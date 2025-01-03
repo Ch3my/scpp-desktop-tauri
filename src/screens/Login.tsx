@@ -74,7 +74,7 @@ export default function Login() {
                     <Button variant="outline" asChild>
                         <Link to="/config">Config</Link>
                     </Button>
-                    <Button className="block" onClick={() => login()}>Entrar</Button>
+                    <Button onClick={() => login()}>Entrar</Button>
                 </CardFooter>
             </Card>
         </div>

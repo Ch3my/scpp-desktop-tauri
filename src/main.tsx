@@ -17,8 +17,8 @@ const RootComponent = () => {
   return (
     <SidebarProvider defaultOpen={false}>
       {isLoggedIn && <AppSidebar />}
+      <Toaster />
       <BrowserRouter>
-        <Toaster />
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/login" element={<Login />} />
