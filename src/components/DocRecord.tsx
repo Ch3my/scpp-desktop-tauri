@@ -50,8 +50,8 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     const [proposito, setProposito] = useState<string>('');
     const [montoStr, setMontoStr] = useState<string>('');
     const [fecha, setFecha] = useState<DateTime>(DateTime.now());
-    const [tipoDoc, setTipoDoc] = useState<string>("0");
-    const [categoria, setCategoria] = useState<string>("0");
+    const [tipoDoc, setTipoDoc] = useState<number>(0);
+    const [categoria, setCategoria] = useState<number>(0);
 
     useEffect(() => {
         const getDoc = async () => {
@@ -101,7 +101,11 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     }
 
     const handleSave = () => {
-        if (tipoDoc == "1" && !categoria) {
+        if(tipoDoc == 0) {
+            toast('Debe seleccionar un tipo de documento');
+            return  
+        }
+        if (tipoDoc == 1 && !categoria) {
             toast('Debe seleccionar una categoria');
             return;
         }
@@ -109,11 +113,11 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             monto,
             proposito,
             fecha: fecha.toFormat('yyyy-MM-dd'),
-            fk_tipoDoc: parseInt(tipoDoc),
-            fk_categoria: parseInt(categoria),
+            fk_tipoDoc: tipoDoc,
+            fk_categoria: categoria,
             sessionHash: sessionId
         };
-        if (tipoDoc != "1") {
+        if (tipoDoc != 1) {
             payload.fk_categoria = null;
         }
         if (id) {
@@ -148,8 +152,8 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             setMontoStr("0");
             setProposito('');
             setFecha(DateTime.now());
-            setTipoDoc("0");
-            setCategoria("0");
+            setTipoDoc(0);
+            setCategoria(0);
         }
     };
 
@@ -168,82 +172,72 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             {/* To avoid anoying warning */}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex flex-col">
-                        <div>
-                            <Label className="text-muted-foreground">Monto</Label>
-                            <Input
-                                value={montoStr}
-                                onChange={(e) => {
-                                    if (e.target.value === "" || e.target.value === "-") {
-                                        setMontoStr(e.target.value);
-                                        return;
-                                    }
-                                    let parseado = parseInt(e.target.value)
-                                    if (isNaN(parseado)) {
-                                        setMontoStr("0");
-                                        setMonto(0)
-                                        return
-                                    }
-                                    setMontoStr(parseado.toString());
-                                    setMonto(parseado)
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-muted-foreground">Proposito</Label>
-                            <Input
-                                value={proposito}
-                                onChange={(e) => setProposito(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-muted-foreground">Fecha</Label>
-                            <DatePicker
-                                value={fecha}
-                                onChange={(e) => e && setFecha(e)}
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-muted-foreground">Tipo Doc</Label>
-                            <Select value={tipoDoc} onValueChange={(e) => {
-                                setTipoDoc(e)
-                            }}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Tipo Doc</SelectLabel>
-                                        {tipoDocs.map((tipo) => (
-                                            <SelectItem key={tipo.id} value={tipo.id}>
-                                                {tipo.descripcion}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label className="text-muted-foreground">Categoria</Label>
-                            <Select value={categoria} onValueChange={(e) => setCategoria(e)}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Categoria</SelectLabel>
-                                        {categorias.map((categoria) => (
-                                            <SelectItem key={categoria.id} value={categoria.id}>
-                                                {categoria.descripcion}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div className="grid gap-4 items-center" style={{ gridTemplateColumns: '1fr 3fr' }}>
+                        <Label>Monto</Label>
+                        <Input
+                            value={montoStr}
+                            onChange={(e) => {
+                                if (e.target.value === "" || e.target.value === "-") {
+                                    setMontoStr(e.target.value);
+                                    return;
+                                }
+                                let parseado = parseInt(e.target.value)
+                                if (isNaN(parseado)) {
+                                    setMontoStr("0");
+                                    setMonto(0)
+                                    return
+                                }
+                                setMontoStr(parseado.toString());
+                                setMonto(parseado)
+                            }}
+                        />
+                        <Label>Proposito</Label>
+                        <Input
+                            value={proposito}
+                            onChange={(e) => setProposito(e.target.value)}
+                        />
+                        <Label>Fecha</Label>
+                        <DatePicker
+                            value={fecha}
+                            onChange={(e) => e && setFecha(e)}
+                        />
+                        <Label>Tipo Doc</Label>
+                        <Select value={String(tipoDoc)} onValueChange={(e) => {
+                            setTipoDoc(Number(e))
+                        }}>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Tipo Doc</SelectLabel>
+                                    {tipoDocs.map((tipo) => (
+                                        <SelectItem key={tipo.id} value={String(tipo.id)}>
+                                            {tipo.descripcion}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Label>Categoria</Label>
+                        <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))}>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Categoria</SelectLabel>
+                                    {categorias.map((categoria) => (
+                                        <SelectItem key={categoria.id} value={String(categoria.id)}>
+                                            {categoria.descripcion}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <DialogFooter className="sm:justify-start">
-                        <Button variant="secondary" onClick={() => handleDialogChange(false)}>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => handleDialogChange(false)}>
                             Salir
                         </Button>
                         {id !== undefined && id > 0 && (

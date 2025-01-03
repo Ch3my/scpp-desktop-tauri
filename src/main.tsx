@@ -10,6 +10,7 @@ import Config from "./screens/Config";
 import { useAppState } from "./AppState";
 import Dashboard from "./screens/Dashboard";
 import "./App.css";
+import "./Custom.css";
 
 const RootComponent = () => {
   const { isLoggedIn } = useAppState();

@@ -17,42 +17,43 @@ interface DatePickerProps {
   onChange: (date: DateTime | undefined) => void;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange }) => {
-  const [selectedDate, setSelectedDate] = React.useState<DateTime | undefined>(value);
+export const DatePicker: React.FC<DatePickerProps & { className?: string }> = ({ value, onChange, className }) => {
+    const [selectedDate, setSelectedDate] = React.useState<DateTime | undefined>(value);
 
-  useEffect(() => {
-    setSelectedDate(value);
-  }, [value]);
+    useEffect(() => {
+        setSelectedDate(value);
+    }, [value]);
 
-  // Handle Luxon `DateTime` conversion to `Date` and vice versa
-  const handleSelect = (date: Date | undefined) => {
-    const luxonDate = date ? DateTime.fromJSDate(date) : undefined;
-    setSelectedDate(luxonDate);
-    onChange(luxonDate);
-  };
+    // Handle Luxon `DateTime` conversion to `Date` and vice versa
+    const handleSelect = (date: Date | undefined) => {
+        const luxonDate = date ? DateTime.fromJSDate(date) : undefined;
+        setSelectedDate(luxonDate);
+        onChange(luxonDate);
+    };
 
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !selectedDate && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon />
-          {selectedDate ? selectedDate.toFormat("DDD") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          selected={selectedDate?.toJSDate()}
-          onSelect={handleSelect}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
-  );
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={"outline"}
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground",
+                        className
+                    )}
+                >
+                    <CalendarIcon />
+                    {selectedDate ? selectedDate.toFormat("DDD") : <span>Pick a date</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={selectedDate?.toJSDate()}
+                    onSelect={handleSelect}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+    );
 };
