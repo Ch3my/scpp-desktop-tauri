@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react"
 import { fetch } from "@tauri-apps/plugin-http"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { DateTime } from "luxon";
@@ -18,6 +18,8 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
+import LoadingCircle from "./LoadingCircle";
+import { Skeleton } from "./ui/skeleton";
 
 const chartConfig = {
     gastos: {
@@ -34,7 +36,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-export default function MonthlyGraphChart() {
+function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
     const { apiPrefix, sessionId } = useAppState() // from your context
 
     // We store the fetched data as "any" without a specific interface/type
@@ -76,6 +78,13 @@ export default function MonthlyGraphChart() {
         fetchData()
     }, [])
 
+    // Expose fetchData to parent through the ref
+    useImperativeHandle(ref, () => ({
+        refetchData: () => {
+            fetchData()
+        },
+    }))
+
     const chartData = monthlyGraphData.labels.map((label: string, index: number) => {
         const monthName = DateTime.fromFormat(label, "yyyy-MM").toFormat("MMMM").slice(0, 3);
         return {
@@ -95,7 +104,7 @@ export default function MonthlyGraphChart() {
             </CardHeader> */}
 
             {/* // <CardContent> */}
-            {isLoading && <p>Loading chart data...</p>}
+            {isLoading && <Skeleton className="h-[40vh] w-full" />}
             {error && <p className="text-red-500">{error}</p>}
             {!isLoading && !error && chartData.length > 0 && (
                 <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full" >
@@ -159,3 +168,4 @@ export default function MonthlyGraphChart() {
         </div>
     )
 }
+export default forwardRef(MonthlyGraphChart)

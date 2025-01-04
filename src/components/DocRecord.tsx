@@ -41,6 +41,7 @@ interface DocRecordProps {
 
 const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenChange, isOpen: controlledIsOpen }) => {
     const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState<boolean>(false);
+    const [disableCategoria, setDisableCategoria] = useState<boolean>(false);
     // Decide whether to use the parent’s isOpen or our local state
     const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
 
@@ -50,10 +51,17 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     const [proposito, setProposito] = useState<string>('');
     const [montoStr, setMontoStr] = useState<string>('');
     const [fecha, setFecha] = useState<DateTime>(DateTime.now());
-    const [tipoDoc, setTipoDoc] = useState<number>(0);
+    const [tipoDoc, setTipoDoc] = useState<number>(1);
     const [categoria, setCategoria] = useState<number>(0);
 
     useEffect(() => {
+        setMonto(0);
+        setMontoStr("0");
+        setProposito('');
+        setFecha(DateTime.now());
+        setTipoDoc(1);
+        setCategoria(0);
+
         const getDoc = async () => {
             let params = new URLSearchParams();
             params.set("sessionHash", sessionId);
@@ -80,7 +88,16 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
         if (id) {
             getDoc()
         }
-    }, [id]);
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (tipoDoc == 1) {
+            setDisableCategoria(false)
+        } else {
+            setDisableCategoria(true)
+            setCategoria(0)
+        }
+    }, [tipoDoc])
 
     const deleteDoc = async () => {
         let params = new URLSearchParams();
@@ -100,7 +117,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
         toast('Documento Eliminado');
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if(tipoDoc == 0) {
             toast('Debe seleccionar un tipo de documento');
             return  
@@ -109,7 +126,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             toast('Debe seleccionar una categoria');
             return;
         }
-        const payload: { monto: number; proposito: string; fecha: string; fk_tipoDoc: number; fk_categoria: number | null; sessionHash: string } = {
+        const payload: { id?: number; monto: number; proposito: string; fecha: string; fk_tipoDoc: number; fk_categoria: number | null; sessionHash: string } = {
             monto,
             proposito,
             fecha: fecha.toFormat('yyyy-MM-dd'),
@@ -121,14 +138,15 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             payload.fk_categoria = null;
         }
         if (id) {
-            fetch(`${apiPrefix}/documentos`, {
+            payload.id = id
+            await fetch(`${apiPrefix}/documentos`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             toast('Documento Actualizado');
         } else {
-            fetch(`${apiPrefix}/documentos`, {
+            await fetch(`${apiPrefix}/documentos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -145,15 +163,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
         // Otherwise, fall back to local state
         if (controlledIsOpen === undefined) {
             setUncontrolledIsOpen(open);
-        }
-
-        if (open === false) {
-            setMonto(0);
-            setMontoStr("0");
-            setProposito('');
-            setFecha(DateTime.now());
-            setTipoDoc(0);
-            setCategoria(0);
         }
     };
 
@@ -210,7 +219,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Tipo Doc</SelectLabel>
                                     {tipoDocs.map((tipo) => (
                                         <SelectItem key={tipo.id} value={String(tipo.id)}>
                                             {tipo.descripcion}
@@ -220,7 +228,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             </SelectContent>
                         </Select>
                         <Label>Categoria</Label>
-                        <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))}>
+                        <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))} disabled={disableCategoria}>
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>

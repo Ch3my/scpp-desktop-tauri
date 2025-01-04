@@ -1,4 +1,4 @@
-import { Home, Inbox, Settings } from "lucide-react"
+import { Home, Inbox, Settings, SquarePlay } from "lucide-react"
 
 import {
   Sidebar,
@@ -15,13 +15,13 @@ import {
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/dashboard",
     icon: Home,
   },
   {
     title: "Assets",
-    url: "#",
-    icon: Inbox,
+    url: "/assets",
+    icon: SquarePlay,
   },
   // {
   //   title: "Calendar",
@@ -35,7 +35,7 @@ const items = [
   // },
   {
     title: "Settings",
-    url: "#",
+    url: "/htas",
     icon: Settings,
   },
 ]

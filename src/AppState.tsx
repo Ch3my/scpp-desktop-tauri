@@ -16,7 +16,7 @@ interface State {
 }
 
 export const useAppState = create<State>((set, get) => ({
-    isLoggedIn: false,
+    isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
     apiPrefix: localStorage.getItem("apiPrefix") || "",
     sessionId: localStorage.getItem("sessionId") || "",
     setLoggedIn: (isLoggedIn: boolean) => set({ isLoggedIn }),

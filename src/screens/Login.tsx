@@ -16,16 +16,11 @@ import { Link, useNavigate } from "react-router"
 // Para evitar CORS, usa RUST para hacer las request
 import { fetch } from '@tauri-apps/plugin-http';
 
-// interface LoginResponse {
-//     hasErrors: boolean;
-//     [key: string]: any; // Include additional properties if needed
-// }
-
 export default function Login() {
     const [user, setUser] = useState<string>("");
     const [pass, setPass] = useState<string>("");
     let navigate = useNavigate();
-    const { apiPrefix, setSessionId } = useAppState()
+    const { apiPrefix, setSessionId, setLoggedIn } = useAppState()
 
     const login = async () => {
         if (!user || !pass) {
@@ -45,6 +40,8 @@ export default function Login() {
             return
         }
         localStorage.setItem("sessionId", response.sessionHash)
+        localStorage.setItem("isLoggedIn", "true")
+        setLoggedIn(true)
         setSessionId(response.sessionHash)
         navigate("/dashboard")
     }

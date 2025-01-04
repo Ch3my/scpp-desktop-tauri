@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { fetch } from '@tauri-apps/plugin-http';
 import { useAppState } from "./AppState";
 import { useNavigate } from "react-router";
+import LoadingCircle from "./components/LoadingCircle";
 
 export default function App() {
   let navigate = useNavigate();
@@ -40,8 +41,8 @@ export default function App() {
   }, []);
 
   return (
-  <div className="h-screen w-screen flex items-center justify-center">
-    <div className="border-gray-300 h-20 w-20 animate-spin rounded-full border-8 border-t-blue-600" />
-  </div>
+    <div className="h-screen w-screen">
+      <LoadingCircle />
+    </div>
   )
 }

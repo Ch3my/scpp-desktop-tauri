@@ -9,6 +9,8 @@ import Login from "./screens/Login";
 import Config from "./screens/Config";
 import { useAppState } from "./AppState";
 import Dashboard from "./screens/Dashboard";
+import { Htas } from "./screens/Htas";
+import Assets from "./screens/Assets";
 import "./App.css";
 import "./Custom.css";
 
@@ -25,6 +27,8 @@ const RootComponent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/config" element={<Config />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/htas" element={<Htas />} />
+          <Route path="/assets" element={<Assets />} />
         </Routes>
       </BrowserRouter>
     </SidebarProvider>

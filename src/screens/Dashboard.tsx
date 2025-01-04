@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ScreenTitle from '@/components/ScreenTitle';
 import { useAppState } from "@/AppState"
 import { fetch } from '@tauri-apps/plugin-http';
 import { DateTime } from 'luxon';
-import { SidebarInset } from '@/components/ui/sidebar';
 import numeral from 'numeral';
 import { Label } from '@/components/ui/label';
 import DocRecord from '@/components/DocRecord';
@@ -29,9 +28,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import MonthlyGraphChart from '@/components/MonthlyGraphChart';
-import { TestDonut } from '@/components/TestDonut';
-import { TestBarChart } from '@/components/TestBarChart';
-import { GraficoCategorias } from '@/components/GraficoCategorias';
+import GraficoCategorias from '@/components/GraficoCategorias';
 import UsagePercentage from '@/components/UsagePercentaje';
 
 
@@ -46,6 +43,9 @@ const Dashboard: React.FC = () => {
     const [searchPhrase, setSearchPhrase] = useState<string>('');
     const [docs, setDocs] = useState<any[]>([]);
     const [openDocDialog, setOpenDocDialog] = useState<boolean>(false);
+    const monthlyChartRef = useRef<{ refetchData?: () => void }>(null)
+    const barChartRef = useRef<{ refetchData?: () => void }>(null)
+    const percentageRef = useRef<{ refetchData?: () => void }>(null)
 
     const getData = async (paramsOverride?: { fechaInicio?: DateTime, fechaTermino?: DateTime, categoria?: number, searchPhrase?: string, tipoDoc?: number }) => {
         let params = new URLSearchParams();
@@ -83,7 +83,13 @@ const Dashboard: React.FC = () => {
 
     const docDialogOpenChange = (e: boolean) => {
         setOpenDocDialog(e)
-        getData()
+        if(e === false) {
+            setSelectedDocId(0)
+            monthlyChartRef.current?.refetchData?.()
+            barChartRef.current?.refetchData?.()
+            percentageRef.current?.refetchData?.()
+            getData()
+        }
     }
 
     const handleRowClick = (id: number) => {
@@ -185,10 +191,10 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="grid grid-rows-2">
                 <div className="grid gap-2 items-center" style={{ gridTemplateColumns: '2fr 4fr' }}>
-                <UsagePercentage />
-                    <MonthlyGraphChart />
+                    <UsagePercentage ref={percentageRef} />
+                    <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
                 </div>
-                <GraficoCategorias onBarClick={(e) => onBarClick(e)} />
+                <MonthlyGraphChart ref={monthlyChartRef} />
             </div>
         </div>
     );
