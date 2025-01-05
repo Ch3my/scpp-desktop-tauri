@@ -8,49 +8,137 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CirclePlus } from "lucide-react"
+import { useEffect, useState } from "react"
+import { DatePicker } from "./DatePicker"
+import { DateTime } from "luxon";
+import { useAppState } from "@/AppState"
+import Resizer from "react-image-file-resizer";
+import { fetch } from "@tauri-apps/plugin-http"
+import { toast } from "sonner";
 
 export function NewAsset() {
+  const [open, setOpen] = useState(false);
+  const [descripcion, setDescripcion] = useState("");
+  const [fecha, setFecha] = useState<DateTime>(DateTime.now());
+  const [categoria, setCategoria] = useState<number>(0);
+  const [image, setImage] = useState<string>("");
+  const { apiPrefix, sessionId, categorias } = useAppState();
+
+  const handleImageUpload = (file: File) => {
+    Resizer.imageFileResizer(
+      file,
+      1280,
+      1280,
+      "JPEG",
+      100,
+      0,
+      (uri) => {
+        setImage(uri as string)
+        return uri
+      },
+      "base64"
+    );
+  };
+
+  const handleSubmit = async () => {
+    // TODO set Loading state to Button
+    if (!descripcion || !categoria) {
+      alert("Please fill in all fields and upload an image.");
+      return;
+    }
+
+    try {
+      let res = await fetch(`${apiPrefix}/assets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+      },
+        body: JSON.stringify({ sessionHash: sessionId, descripcion, fecha, fk_categoria: categoria, assetData: image }),
+      }).then(response => response.json())
+      toast('Asset guardado');
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setDescripcion("")
+      setFecha(DateTime.now())
+      setCategoria(0)
+      setImage("")
+    }
+  }, [open])
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <Button variant="outline"><CirclePlus /></Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
-          </DialogDescription>
+          <DialogTitle>Agregar Asset</DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              defaultValue="Pedro Duarte"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-            />
-          </div>
+        <div className="grid gap-4 items-center" style={{ gridTemplateColumns: '1fr 3fr' }}>
+          <Label>Descripcion</Label>
+          <Input id="name" onChange={e => setDescripcion(e.target.value)} />
+          <Label>Fecha</Label>
+          <DatePicker
+            value={fecha}
+            onChange={(e) => e && setFecha(e)}
+          />
+          <Label>Categoria</Label>
+          <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Categoria</SelectLabel>
+                {categorias.map((categoria) => (
+                  <SelectItem key={categoria.id} value={String(categoria.id)}>
+                    {categoria.descripcion}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Label>Imagen</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                handleImageUpload(file)
+              }
+            }}
+          />
         </div>
+        {image && (
+          <div className="mt-4">
+            <Label>Preview</Label>
+            <img src={image} alt="Preview" style={{ maxWidth: "100%", maxHeight: "150px" }} />
+          </div>
+        )}
         <DialogFooter>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit" onClick={handleSubmit}>Guardar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

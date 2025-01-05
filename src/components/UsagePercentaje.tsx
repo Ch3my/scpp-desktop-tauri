@@ -1,9 +1,11 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { fetch } from "@tauri-apps/plugin-http"
 import { useAppState } from "@/AppState"
+import numeral from 'numeral';
 
 function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     const [percentage, setPercentage] = useState<number>(0);
+    const [topGastos, setTopGastos] = useState<any[]>([]);
     const { apiPrefix, sessionId } = useAppState()
 
     const fetchPercentage = async () => {
@@ -15,9 +17,8 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                 'Content-Type': 'application/json'
             }
         }).then(response => response.json())
-        console.log(response);
-
-        setPercentage(response.porcentajeUsado)
+        setTopGastos(response.topGastos.slice(0, 5))
+        setPercentage(parseInt(response.porcentajeUsado))
     };
 
     useEffect(() => {
@@ -32,9 +33,20 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     }))
 
     return (
-        <div className="flex items-center justify-center flex-col gap-2">
-            <p className='text-5xl font-bold'>{percentage}%</p>
-            <p className='text-muted-foreground'>Ingresos mes usado</p>
+        <div className='flex flex-col gap-4'>
+            <div className="flex items-center justify-center flex-col">
+                <p className='text-5xl font-bold'>{percentage}%</p>
+                <p className='text-muted-foreground'>Ingresos mes usado</p>
+            </div>
+            <div>
+                {topGastos.map((gasto, index) => (
+                    <div key={index} className="flex justify-between w-full">
+                        <span>{gasto.proposito}</span>
+                        <span>{numeral(gasto.monto).format('$0,0')}</span>
+                    </div>
+                ))}
+                <p className='text-muted-foreground text-center'>Top Gastos</p>
+            </div>
         </div>
     );
 };

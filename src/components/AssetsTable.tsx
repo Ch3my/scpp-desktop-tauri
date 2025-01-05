@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import {
     ColumnDef,
@@ -13,7 +11,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, CirclePlus, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,8 +19,6 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -35,8 +31,9 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { NewAsset } from "./NewAsset"
+import { useAppState } from "@/AppState"
+import { toast } from "sonner"
 
-// 1) Define the type for an Asset row
 export type Asset = {
     id: number
     fecha: string
@@ -46,7 +43,24 @@ export type Asset = {
     }
 }
 
-// 2) Create your column definitions
+async function deleteAsset(id: number) {
+    const { apiPrefix, sessionId } = useAppState()
+    let params = new URLSearchParams();
+    params.set("sessionHash", sessionId);
+    params.set("id", id?.toString() || '');
+
+    const response = await fetch(`${apiPrefix}/assets`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: params,
+
+    }).then(response => response.json())
+    toast('Documento Eliminado');
+}
+
+
 export const columns: ColumnDef<Asset>[] = [
     {
         accessorKey: "fecha",
@@ -78,14 +92,14 @@ export const columns: ColumnDef<Asset>[] = [
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-6 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            onClick={() => alert(`Viewing asset: ${asset.id}`)}
+                            onClick={() => deleteAsset(asset.id)}
                         >
                             Eliminar
                         </DropdownMenuItem>
@@ -97,12 +111,13 @@ export const columns: ColumnDef<Asset>[] = [
 ]
 
 interface AssetsTableProps {
-  assets: Asset[];
-  handleNewDocBtn: () => void;
-  handleRowClick: (id: number) => void;
+    assets: Asset[];
+    loading?: boolean;
+    handleNewDocBtn: () => void;
+    handleRowClick: (id: number) => void;
 }
 
-const AssetsTable: React.FC<AssetsTableProps> = ({ assets, handleNewDocBtn, handleRowClick  }) => {
+const AssetsTable: React.FC<AssetsTableProps> = ({ assets, handleNewDocBtn, handleRowClick, loading }) => {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -135,7 +150,7 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets, handleNewDocBtn, hand
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown />
+                            Columnas <ChevronDown />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -180,12 +195,17 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets, handleNewDocBtn, hand
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
+                    {loading ? (
+                        <TableRow>
+                            <TableCell colSpan={columns.length} className="text-center">
+                                Cargando...
+                            </TableCell>
+                        </TableRow>
+                    ) : table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
-                                // Example row-click action
                                 onClick={() => handleRowClick(row.original.id)}
                             >
                                 {row.getVisibleCells().map((cell) => (
@@ -198,7 +218,7 @@ const AssetsTable: React.FC<AssetsTableProps> = ({ assets, handleNewDocBtn, hand
                     ) : (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
+                                No results
                             </TableCell>
                         </TableRow>
                     )}

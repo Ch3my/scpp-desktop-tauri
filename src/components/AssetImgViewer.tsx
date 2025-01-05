@@ -48,7 +48,7 @@ const AssetImgViewer: React.FC<AssetImgViewerProps> = ({ base64Img }) => {
   // --- Handle wheel zoom
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      e.preventDefault();
+      // e.preventDefault();
 
       const container = containerRef.current;
       if (!container) return;

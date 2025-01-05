@@ -100,10 +100,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     }, [tipoDoc])
 
     const deleteDoc = async () => {
-        let params = new URLSearchParams();
-        params.set("sessionHash", sessionId);
-        params.set("id", id?.toString() || '');
-
         const response = await fetch(`${apiPrefix}/documentos`, {
             method: 'DELETE',
             headers: {
@@ -245,9 +241,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                         </Select>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => handleDialogChange(false)}>
-                            Salir
-                        </Button>
                         {id !== undefined && id > 0 && (
                             <Button variant="destructive" onClick={deleteDoc}>
                                 Eliminar
