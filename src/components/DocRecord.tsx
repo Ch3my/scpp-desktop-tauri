@@ -26,8 +26,7 @@ import {
     DialogDescription
 } from "@/components/ui/dialog";
 import { fetch } from '@tauri-apps/plugin-http';
-import numeral from 'numeral';
-
+import { NumberInput } from './NumberInput';
 
 interface DocRecordProps {
     id?: number; // Optional id to indicate editing mode
@@ -50,14 +49,12 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
 
     const [monto, setMonto] = useState<number>(0);
     const [proposito, setProposito] = useState<string>('');
-    const [montoStr, setMontoStr] = useState<string>('');
     const [fecha, setFecha] = useState<DateTime>(DateTime.now());
     const [tipoDoc, setTipoDoc] = useState<number>(1);
     const [categoria, setCategoria] = useState<number>(0);
 
     useEffect(() => {
         setMonto(0);
-        setMontoStr("0");
         setProposito('');
         setFecha(DateTime.now());
         setTipoDoc(1);
@@ -77,9 +74,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
 
             // TODO. Handle error
             const doc = response[0];
-            // TODO create number input formated component
             setMonto(doc.monto);
-            setMontoStr(numeral(doc.monto).format("0,0"));
             setProposito(doc.proposito);
             setFecha(DateTime.fromFormat(doc.fecha, "yyyy-MM-dd"));
             setTipoDoc(doc.fk_tipoDoc);
@@ -180,23 +175,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                     </DialogHeader>
                     <div className="grid gap-4 items-center" style={{ gridTemplateColumns: '1fr 3fr' }}>
                         <Label>Monto</Label>
-                        <Input
-                            value={montoStr}
-                            onChange={(e) => {
-                                if (e.target.value === "" || e.target.value === "-") {
-                                    setMontoStr(e.target.value);
-                                    return;
-                                }
-                                let parseado = parseInt(e.target.value)
-                                if (isNaN(parseado)) {
-                                    setMontoStr("0");
-                                    setMonto(0)
-                                    return
-                                }
-                                setMontoStr(numeral(parseado).format("0,0"));
-                                setMonto(parseado)
-                            }}
-                        />
+                        <NumberInput value={monto} onChange={setMonto} decimalPlaces={0} />
                         <Label>Proposito</Label>
                         <Input
                             value={proposito}
