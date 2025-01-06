@@ -54,8 +54,11 @@ const Dashboard: React.FC = () => {
         params.set("fechaTermino", (paramsOverride?.fechaTermino || fechaTermino)?.toFormat('yyyy-MM-dd'));
         params.set("searchPhrase", paramsOverride?.searchPhrase !== undefined ? paramsOverride.searchPhrase : searchPhrase);
         params.set("fk_tipoDoc", (paramsOverride?.tipoDoc || selectedTipoDoc).toString());
-        if ((paramsOverride?.categoria || selectedCategoria) > 0) {
-            params.set("fk_categoria", (paramsOverride?.categoria || selectedCategoria).toString());
+
+        // Extract the category value, prioritizing paramsOverride if it exists
+        const categoria = paramsOverride?.categoria ?? selectedCategoria;
+        if (categoria > 0) {
+            params.set("fk_categoria", categoria.toString());
         }
 
         let data = await fetch(`${apiPrefix}/documentos?${params.toString()}`, {
@@ -83,7 +86,7 @@ const Dashboard: React.FC = () => {
 
     const docDialogOpenChange = (e: boolean) => {
         setOpenDocDialog(e)
-        if(e === false) {
+        if (e === false) {
             setSelectedDocId(0)
             monthlyChartRef.current?.refetchData?.()
             barChartRef.current?.refetchData?.()

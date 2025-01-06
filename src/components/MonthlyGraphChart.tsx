@@ -97,13 +97,6 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
 
     return (
         <div>
-            {/* // <Card> */}
-            {/* <CardHeader>
-                <CardTitle>Histórico financiero mensual</CardTitle>
-                <CardDescription>Ultimos 13 meses</CardDescription>
-            </CardHeader> */}
-
-            {/* // <CardContent> */}
             {isLoading && <Skeleton className="h-[40vh] w-full" />}
             {error && <p className="text-red-500">{error}</p>}
             {!isLoading && !error && chartData.length > 0 && (
@@ -163,8 +156,6 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
             <div className="flex items-center justify-center text-muted-foreground">
                 <p>Historico financiero mensual</p>
             </div>
-            {/* </CardContent> */}
-            {/* </Card> */}
         </div>
     )
 }

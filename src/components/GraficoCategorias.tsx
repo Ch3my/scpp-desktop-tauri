@@ -7,6 +7,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Skeleton } from "./ui/skeleton";
 
 const chartConfig = {
     desktop: {
@@ -29,10 +30,12 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
     function GraficoCategorias(props, ref) {
         const { onBarClick } = props;
         const [chartData, setChartData] = useState([]);
+        const [isLoading, setIsLoading] = useState(false)
         const { apiPrefix, sessionId } = useAppState();
 
         const fetchData = async () => {
             try {
+                setIsLoading(true)
                 const params = new URLSearchParams();
                 params.set("sessionHash", sessionId);
                 params.set("nMonths", "13");
@@ -61,6 +64,7 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
             } catch (error) {
                 console.error("Error fetching chart data:", error);
             }
+            setIsLoading(false)
         };
 
         useImperativeHandle(ref, () => ({
@@ -81,23 +85,27 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
 
         return (
             <div>
-                <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
-                    <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
-                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                        <Bar dataKey="amount" fill="var(--color-desktop)" radius={8} onClick={handleBarClick}>
-                            <LabelList
-                                dataKey="amount"
-                                position="top"
-                                offset={12}
-                                className="fill-foreground"
-                                fontSize={12}
-                                formatter={(value: number) => new Intl.NumberFormat("en-US").format(value)}
-                            />
-                        </Bar>
-                    </BarChart>
-                </ChartContainer>
+                {isLoading ? (
+                    <Skeleton className="h-[40vh] w-full" />
+                ) : (
+                    <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
+                        <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                            <Bar dataKey="amount" fill="var(--color-desktop)" radius={8} onClick={handleBarClick}>
+                                <LabelList
+                                    dataKey="amount"
+                                    position="top"
+                                    offset={12}
+                                    className="fill-foreground"
+                                    fontSize={12}
+                                    formatter={(value: number) => new Intl.NumberFormat("en-US").format(value)}
+                                />
+                            </Bar>
+                        </BarChart>
+                    </ChartContainer>
+                )}
                 <div className="flex items-center justify-center text-muted-foreground">
                     <p>Resumen categoría 13 Meses</p>
                 </div>

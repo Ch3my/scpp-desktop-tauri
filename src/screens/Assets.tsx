@@ -5,6 +5,15 @@ import { fetch } from '@tauri-apps/plugin-http';
 import AssetsTable, { Asset } from '@/components/AssetsTable';
 import AssetImgViewer from '@/components/AssetImgViewer';
 import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 import {
     DropdownMenu,
@@ -23,12 +32,16 @@ import {
 } from "@/components/ui/table"
 import { toast } from 'sonner';
 import { NewAsset } from '@/components/NewAsset';
+import LoadingCircle from '@/components/LoadingCircle';
 
 const Assets: React.FC = () => {
     const { apiPrefix, sessionId, fetchCategorias, } = useAppState()
     const [assets, setAssets] = React.useState<Asset[]>([]);
     const [base64Img, setBase64Img] = React.useState<string>("");
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [loadingAsset, setLoadingAsset] = React.useState<boolean>(false);
+    const [assetIdToBeDeleted, setAssetIdToBeDeleted] = React.useState<number>(0);
+    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState<boolean>(false);
 
     const getData = async () => {
         setLoading(true);
@@ -49,6 +62,7 @@ const Assets: React.FC = () => {
         if (e.target.textContent === "Eliminar") {
             return;
         }
+        setLoadingAsset(true)
 
         let params = new URLSearchParams();
         params.set("sessionHash", sessionId);
@@ -60,17 +74,22 @@ const Assets: React.FC = () => {
             }
         }).then(response => response.json())
         setBase64Img(data[0].assetData);
+        setLoadingAsset(false)
     }
 
-    const deleteAsset = async (id: number) => {
-        // TODO, ask for confirmation
+    const deleteAsset = async (confirmed?: boolean) => {
+        if (!confirmed) {
+            setShowDeleteConfirm(true)
+            return
+        }
+        setShowDeleteConfirm(false)
         setBase64Img("");
         const response = await fetch(`${apiPrefix}/assets`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ sessionHash: sessionId, id: id }),
+            body: JSON.stringify({ sessionHash: sessionId, id: assetIdToBeDeleted }),
 
         }).then(response => response.json())
         toast('Documento Eliminado')
@@ -87,7 +106,7 @@ const Assets: React.FC = () => {
             <div>
                 <ScreenTitle title='Assets' />
                 <div>
-                    <NewAsset />
+                    <NewAsset onAssetSaved={() => getData()} />
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -98,35 +117,60 @@ const Assets: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {assets.map((asset, index) => (
-                                <TableRow key={index} onClick={(e) => handleRowClick(asset.id, e)}>
-                                    <TableCell>{asset.fecha}</TableCell>
-                                    <TableCell>{asset.descripcion}</TableCell>
-                                    <TableCell>{asset.categoria.descripcion}</TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-6 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                    onClick={() => deleteAsset(asset.id)}
-                                                >
-                                                    Eliminar
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">Cargando...</TableCell>
                                 </TableRow>
-                            ))}
+                            ) : (
+                                assets.map((asset, index) => (
+                                    <TableRow key={index} onClick={(e) => handleRowClick(asset.id, e)}>
+                                        <TableCell>{asset.fecha}</TableCell>
+                                        <TableCell>{asset.descripcion}</TableCell>
+                                        <TableCell>{asset.categoria.descripcion}</TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-6 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontal />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        onClick={() => {
+                                                            setAssetIdToBeDeleted(asset.id)
+                                                            deleteAsset()
+                                                        }}
+                                                    >
+                                                        Eliminar
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </div>
             </div>
-            <AssetImgViewer base64Img={base64Img} />
+            {loadingAsset ?
+                <LoadingCircle /> :
+                <AssetImgViewer base64Img={base64Img} />
+            }
+            <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Eliminar Asset?</DialogTitle>
+                        <DialogDescription>
+                            Esta accion no se puede deshacer
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button onClick={() => deleteAsset(true)} variant="destructive">Eliminar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

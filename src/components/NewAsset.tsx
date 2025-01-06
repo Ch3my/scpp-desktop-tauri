@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CirclePlus } from "lucide-react"
+import { CirclePlus, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { DatePicker } from "./DatePicker"
 import { DateTime } from "luxon";
@@ -28,8 +28,9 @@ import Resizer from "react-image-file-resizer";
 import { fetch } from "@tauri-apps/plugin-http"
 import { toast } from "sonner";
 
-export function NewAsset() {
+export function NewAsset({ onAssetSaved }: { onAssetSaved: () => void }) {
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState<DateTime>(DateTime.now());
   const [categoria, setCategoria] = useState<number>(0);
@@ -53,9 +54,10 @@ export function NewAsset() {
   };
 
   const handleSubmit = async () => {
-    // TODO set Loading state to Button
-    if (!descripcion || !categoria) {
-      alert("Please fill in all fields and upload an image.");
+    setBusy(true)
+    if (!descripcion || !categoria || !image) {
+      toast("Faltan Datos");
+      setBusy(false)
       return;
     }
 
@@ -64,22 +66,26 @@ export function NewAsset() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-      },
+        },
         body: JSON.stringify({ sessionHash: sessionId, descripcion, fecha, fk_categoria: categoria, assetData: image }),
       }).then(response => response.json())
       toast('Asset guardado');
       setOpen(false);
+      onAssetSaved()
     } catch (error) {
       console.error(error);
     }
+    setBusy(false)
   };
 
   useEffect(() => {
     if (!open) {
-      setDescripcion("")
-      setFecha(DateTime.now())
-      setCategoria(0)
-      setImage("")
+      setTimeout(()=>{
+        setDescripcion("")
+        setFecha(DateTime.now())
+        setCategoria(0)
+        setImage("")
+       }, 100)
     }
   }, [open])
 
@@ -136,7 +142,9 @@ export function NewAsset() {
           </div>
         )}
         <DialogFooter>
-          <Button type="submit" onClick={handleSubmit}>Guardar</Button>
+          <Button type="submit" onClick={handleSubmit} disabled={busy}>
+            {busy ? <Loader2 className="animate-spin" /> : "Guardar"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
