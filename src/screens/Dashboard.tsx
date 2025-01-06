@@ -192,12 +192,17 @@ const Dashboard: React.FC = () => {
                     </Table>
                 </div>
             </div>
-            <div className="grid grid-rows-2">
+            <div className="grid grid-rows-2 gap-2">
                 <div className="grid gap-2 items-center" style={{ gridTemplateColumns: '2fr 4fr' }}>
                     <UsagePercentage ref={percentageRef} />
-                    <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
+                    <div className="border h-full rounded-lg ">
+
+                        <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
+                    </div>
                 </div>
-                <MonthlyGraphChart ref={monthlyChartRef} />
+                <div className="border h-full rounded-lg">
+                    <MonthlyGraphChart ref={monthlyChartRef} />
+                </div>
             </div>
         </div>
     );

@@ -37,7 +37,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     }))
 
     return (
-        <div className='flex flex-col gap-4'>
+        <div className='border rounded-lg p-2 flex flex-col gap-4 h-full justify-center'  >
             {isLoading ? (
                    <div className="flex flex-col space-y-3">
                    <Skeleton className="h-[125px] w-[250px] rounded-xl" />
@@ -47,7 +47,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                    </div>
                  </div>
             ) : (
-                <div>
+                <div className='flex flex-col gap-8'>
                     <div className="flex items-center justify-center flex-col">
                         <p className='text-5xl font-bold'>{percentage}%</p>
                         <p className='text-muted-foreground'>Ingresos mes usado</p>

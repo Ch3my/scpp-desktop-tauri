@@ -4,10 +4,9 @@ import { useAppState } from "@/AppState";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 import {
     ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Skeleton } from "./ui/skeleton";
+import numeral from "numeral";
 
 const chartConfig = {
     desktop: {
@@ -31,6 +30,7 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
         const { onBarClick } = props;
         const [chartData, setChartData] = useState([]);
         const [isLoading, setIsLoading] = useState(false)
+        const [hover, setHover] = useState<number | null>(null)
         const { apiPrefix, sessionId } = useAppState();
 
         const fetchData = async () => {
@@ -89,18 +89,33 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
                     <Skeleton className="h-[40vh] w-full" />
                 ) : (
                     <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
-                        <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
+                        <BarChart accessibilityLayer data={chartData} >
                             <CartesianGrid vertical={false} />
                             <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
-                            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                            <Bar dataKey="amount" fill="var(--color-desktop)" radius={8} onClick={handleBarClick}>
+                            <Bar dataKey="amount" fill="var(--color-desktop)" radius={8} onClick={handleBarClick} shape={(props: any) => {
+                                return (<rect
+                                    fill={props.fill}
+                                    height={props.height}
+                                    width={props.width}
+                                    x={props.x}
+                                    y={props.y}
+                                    onMouseEnter={() => setHover(props.index)}
+                                    onMouseLeave={() => setHover(null)}
+                                    style={{
+                                        filter: hover === props.index ? 'brightness(1.5)' : 'none',
+                                        transition: 'filter 0.2s ease',
+                                    }}
+                                    rx={5}
+                                />
+                                )
+                            }}>
                                 <LabelList
                                     dataKey="amount"
                                     position="top"
                                     offset={12}
                                     className="fill-foreground"
                                     fontSize={12}
-                                    formatter={(value: number) => new Intl.NumberFormat("en-US").format(value)}
+                                    formatter={(value: number) => numeral(value).format("0,0")}
                                 />
                             </Bar>
                         </BarChart>

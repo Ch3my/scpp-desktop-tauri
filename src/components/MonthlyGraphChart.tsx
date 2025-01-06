@@ -1,7 +1,8 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react"
 import { fetch } from "@tauri-apps/plugin-http"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { DateTime } from "luxon";
+import { DateTime, Settings  } from "luxon";
+
 
 import { useAppState } from "@/AppState"
 import {
@@ -66,6 +67,7 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
     }, [apiPrefix, sessionId])
 
     useEffect(() => {
+        Settings.defaultLocale = "es"
         fetchData()
     }, [])
 
@@ -91,10 +93,10 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
             {isLoading && <Skeleton className="h-[40vh] w-full" />}
             {error && <p className="text-red-500">{error}</p>}
             {!isLoading && !error && chartData.length > 0 && (
-                <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full" >
+                <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
                     <LineChart
                         data={chartData}
-                        margin={{ left: 12, right: 12, top: 12 }}
+                        margin={{ left: 12, right: 24, top: 24, bottom: 12 }}
                         accessibilityLayer
                     >
                         <CartesianGrid vertical={false} />
@@ -111,8 +113,8 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
                             }
                         />
                         <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
+                            cursor={true}
+                            content={<ChartTooltipContent indicator="line" className="w-36" />}
                         />
                         {/* Gastos */}
                         <Line
