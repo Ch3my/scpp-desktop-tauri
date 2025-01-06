@@ -1,7 +1,7 @@
-# Tauri + React + Typescript
+# SCPP Tauri
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Cliente para SCPP en Tauri (multiplataforma) con React y ShadCN. Utilizamos el plugin de Rust HTTP para hacer las request al server para evitar CORS
 
-## Recommended IDE Setup
+Guarda datos de la session en el localstorage
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Para compilar `npm run tauri build`
