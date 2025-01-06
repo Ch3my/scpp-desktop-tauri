@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { fetch } from "@tauri-apps/plugin-http";
 import { useAppState } from "@/AppState";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";

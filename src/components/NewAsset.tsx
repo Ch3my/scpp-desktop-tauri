@@ -62,7 +62,7 @@ export function NewAsset({ onAssetSaved }: { onAssetSaved: () => void }) {
     }
 
     try {
-      let res = await fetch(`${apiPrefix}/assets`, {
+      await fetch(`${apiPrefix}/assets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

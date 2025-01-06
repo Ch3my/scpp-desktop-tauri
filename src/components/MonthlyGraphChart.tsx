@@ -5,20 +5,11 @@ import { DateTime } from "luxon";
 
 import { useAppState } from "@/AppState"
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import {
     ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import LoadingCircle from "./LoadingCircle";
 import { Skeleton } from "./ui/skeleton";
 
 const chartConfig = {

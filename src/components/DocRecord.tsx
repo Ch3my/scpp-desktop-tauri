@@ -26,6 +26,7 @@ import {
     DialogDescription
 } from "@/components/ui/dialog";
 import { fetch } from '@tauri-apps/plugin-http';
+import numeral from 'numeral';
 
 
 interface DocRecordProps {
@@ -78,7 +79,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             const doc = response[0];
             // TODO create number input formated component
             setMonto(doc.monto);
-            setMontoStr(doc.monto.toString());
+            setMontoStr(numeral(doc.monto).format("0,0"));
             setProposito(doc.proposito);
             setFecha(DateTime.fromFormat(doc.fecha, "yyyy-MM-dd"));
             setTipoDoc(doc.fk_tipoDoc);
@@ -100,7 +101,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     }, [tipoDoc])
 
     const deleteDoc = async () => {
-        const response = await fetch(`${apiPrefix}/documentos`, {
+        await fetch(`${apiPrefix}/documentos`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,9 +115,9 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     }
 
     const handleSave = async () => {
-        if(tipoDoc == 0) {
+        if (tipoDoc == 0) {
             toast('Debe seleccionar un tipo de documento');
-            return  
+            return
         }
         if (tipoDoc == 1 && !categoria) {
             toast('Debe seleccionar una categoria');
@@ -192,7 +193,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                                     setMonto(0)
                                     return
                                 }
-                                setMontoStr(parseado.toString());
+                                setMontoStr(numeral(parseado).format("0,0"));
                                 setMonto(parseado)
                             }}
                         />

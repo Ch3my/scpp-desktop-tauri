@@ -1,7 +1,7 @@
 import { useAppState } from "@/AppState";
 import { Button } from "@/components/ui/button"
 import { fetch } from '@tauri-apps/plugin-http';
-import { Link, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 import {
     Card,
     CardContent,
@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/card"
 
 export function Htas() {
-    const { isLoggedIn, apiPrefix, sessionId, setLoggedIn, setSessionId } = useAppState();
+    const { apiPrefix, sessionId, setLoggedIn, setSessionId } = useAppState();
     let navigate = useNavigate();
 
     const logout = async () => {
         try {
-            const response = await fetch(`${apiPrefix}/login`, {
+            await fetch(`${apiPrefix}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

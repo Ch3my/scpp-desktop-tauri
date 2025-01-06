@@ -2,7 +2,6 @@ import React from 'react';
 import { useAppState } from "@/AppState"
 import ScreenTitle from '@/components/ScreenTitle';
 import { fetch } from '@tauri-apps/plugin-http';
-import AssetsTable, { Asset } from '@/components/AssetsTable';
 import AssetImgViewer from '@/components/AssetImgViewer';
 import { Button } from "@/components/ui/button"
 import {
@@ -12,12 +11,10 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
@@ -33,6 +30,15 @@ import {
 import { toast } from 'sonner';
 import { NewAsset } from '@/components/NewAsset';
 import LoadingCircle from '@/components/LoadingCircle';
+
+export type Asset = {
+    id: number
+    fecha: string
+    descripcion: string
+    categoria: {
+        descripcion: string
+    }
+}
 
 const Assets: React.FC = () => {
     const { apiPrefix, sessionId, fetchCategorias, } = useAppState()
@@ -84,7 +90,7 @@ const Assets: React.FC = () => {
         }
         setShowDeleteConfirm(false)
         setBase64Img("");
-        const response = await fetch(`${apiPrefix}/assets`, {
+        await fetch(`${apiPrefix}/assets`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

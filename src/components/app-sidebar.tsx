@@ -1,4 +1,4 @@
-import { Home, Inbox, Settings, SquarePlay } from "lucide-react"
+import { Home, Settings, SquarePlay } from "lucide-react"
 
 import {
   Sidebar,
