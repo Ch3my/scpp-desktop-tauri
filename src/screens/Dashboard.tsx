@@ -6,7 +6,7 @@ import { DateTime } from 'luxon';
 import numeral from 'numeral';
 import { Label } from '@/components/ui/label';
 import DocRecord from '@/components/DocRecord';
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus, ListRestart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DocsFilters } from '@/components/DocsFilters';
 import {
@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
         setOpenDocDialog(!openDocDialog)
     }
 
-    const handleTipoDocChange = (tipoDoc: string) => {
+    const handleTipoDocChange = (tipoDoc: string, resetAll: boolean) => {
         const parsedTipoDoc = parseInt(tipoDoc);
         setSelectedTipoDoc(parsedTipoDoc);
 
@@ -122,7 +122,13 @@ const Dashboard: React.FC = () => {
         setFechaInicio(newFechaInicio);
         setFechaTermino(newFechaTermino);
 
-        getData({ tipoDoc: parsedTipoDoc, fechaInicio: newFechaInicio, fechaTermino: newFechaTermino });
+        if (resetAll) {
+            getData({ tipoDoc: parsedTipoDoc, fechaInicio: newFechaInicio, fechaTermino: newFechaTermino, categoria: 0, searchPhrase: "" });
+            setSelectedCategoria(0)
+            setSearchPhrase("")
+        } else {
+            getData({ tipoDoc: parsedTipoDoc, fechaInicio: newFechaInicio, fechaTermino: newFechaTermino });
+        }
     };
 
     const onBarClick = async (catId: number) => {
@@ -148,9 +154,12 @@ const Dashboard: React.FC = () => {
                     <Button variant="outline" onClick={handleNewDocBtn}>
                         <CirclePlus />
                     </Button>
+                    <Button variant="outline" onClick={() => handleTipoDocChange(selectedTipoDoc.toString(), true)}>
+                        <ListRestart />
+                    </Button>
                     <DocsFilters onFiltersChange={handleFiltersChange} fechaInicio={fechaInicio} fechaTermino={fechaTermino}
                         categoria={selectedCategoria} searchPhrase={searchPhrase} />
-                    <Select value={selectedTipoDoc.toString()} onValueChange={handleTipoDocChange}>
+                    <Select value={selectedTipoDoc.toString()} onValueChange={(e) => handleTipoDocChange(e, false)}>
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
