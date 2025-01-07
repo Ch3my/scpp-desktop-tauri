@@ -13,7 +13,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -112,9 +111,8 @@ export function NewAsset({ onAssetSaved }: { onAssetSaved: () => void }) {
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               <SelectGroup>
-                <SelectLabel>Categoria</SelectLabel>
                 {categorias.map((categoria) => (
                   <SelectItem key={categoria.id} value={String(categoria.id)}>
                     {categoria.descripcion}

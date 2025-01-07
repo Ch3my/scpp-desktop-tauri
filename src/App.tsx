@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-// import { invoke } from "@tauri-apps/api/core";
 import { fetch } from '@tauri-apps/plugin-http';
 import { useAppState } from "./AppState";
 import { useNavigate } from "react-router";
@@ -7,7 +6,7 @@ import LoadingCircle from "./components/LoadingCircle";
 
 export default function App() {
   let navigate = useNavigate();
-  const { apiPrefix, sessionId, setLoggedIn, setApiPrefix, setSessionId } = useAppState()
+  const { apiPrefix, sessionId, setLoggedIn, setApiPrefix, setSessionId, fetchCategorias, fetchTipoDocs } = useAppState()
 
   useEffect(() => {
     async function checkLoginStatus() {
@@ -33,10 +32,11 @@ export default function App() {
 
       setSessionId(sessionId)
       setLoggedIn(true)
-
       navigate("/dashboard")
     }
 
+    fetchCategorias()
+    fetchTipoDocs()
     checkLoginStatus();
   }, []);
 

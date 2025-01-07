@@ -33,7 +33,7 @@ import UsagePercentage from '@/components/UsagePercentaje';
 
 
 const Dashboard: React.FC = () => {
-    const { apiPrefix, sessionId, tipoDocs, fetchCategorias, fetchTipoDocs } = useAppState()
+    const { apiPrefix, sessionId, tipoDocs } = useAppState()
     const [fechaInicio, setFechaInicio] = useState<DateTime>(DateTime.now().startOf('month'));
     const [fechaTermino, setFechaTermino] = useState<DateTime>(DateTime.now().endOf('month'));
     const [selectedCategoria, setSelectedCategoria] = useState<number>(0);
@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
     const onBarClick = async (catId: number) => {
         let newFechaInicio = fechaInicio;
         let newFechaTermino = fechaTermino;
-        newFechaInicio = DateTime.now().startOf('year');
+        newFechaInicio = DateTime.now().minus({ months: 12 }).startOf('month');
         newFechaTermino = DateTime.now().endOf('month');
         setFechaInicio(newFechaInicio);
         setFechaTermino(newFechaTermino);
@@ -138,8 +138,6 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         getData()
-        fetchCategorias()
-        fetchTipoDocs()
     }, []);
 
     return (
@@ -196,7 +194,6 @@ const Dashboard: React.FC = () => {
                 <div className="grid gap-2 items-center" style={{ gridTemplateColumns: '2fr 4fr' }}>
                     <UsagePercentage ref={percentageRef} />
                     <div className="border h-full rounded-lg ">
-
                         <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
                     </div>
                 </div>

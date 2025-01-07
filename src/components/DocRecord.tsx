@@ -12,7 +12,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
@@ -208,9 +207,8 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-60">
                                 <SelectGroup>
-                                    <SelectLabel>Categoria</SelectLabel>
                                     {categorias.map((categoria) => (
                                         <SelectItem key={categoria.id} value={String(categoria.id)}>
                                             {categoria.descripcion}

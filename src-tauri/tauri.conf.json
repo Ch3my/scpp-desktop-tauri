@@ -14,7 +14,9 @@
       {
         "title": "SCPP Tauri",
         "width": 1250,
-        "height": 700
+        "height": 700,
+        "visible": false,
+        "center": true
       }
     ],
     "security": {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -11,17 +11,23 @@ import { useAppState } from "./AppState";
 import Dashboard from "./screens/Dashboard";
 import { Htas } from "./screens/Htas";
 import Assets from "./screens/Assets";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import "./Custom.css";
 
 const RootComponent = () => {
   const { isLoggedIn } = useAppState();
 
+  useEffect(() => {
+    // Avoid blank screen on open, only show window once webview has initialized
+    invoke('show_main_window')
+  }, [])
+
   return (
     <SidebarProvider defaultOpen={false}>
-      {isLoggedIn && <AppSidebar />}
       <Toaster />
       <BrowserRouter>
+        {isLoggedIn && <AppSidebar />}
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/login" element={<Login />} />

@@ -139,7 +139,7 @@ export function DocsFilters({
                         <SelectTrigger>
                             <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-60">
                             <SelectItem value="0">(Todos)</SelectItem>
                             {categorias.map((cat) => (
                                 <SelectItem key={cat.id} value={String(cat.id)}>

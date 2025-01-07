@@ -41,7 +41,7 @@ export type Asset = {
 }
 
 const Assets: React.FC = () => {
-    const { apiPrefix, sessionId, fetchCategorias, } = useAppState()
+    const { apiPrefix, sessionId } = useAppState()
     const [assets, setAssets] = React.useState<Asset[]>([]);
     const [base64Img, setBase64Img] = React.useState<string>("");
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -103,7 +103,6 @@ const Assets: React.FC = () => {
     }
 
     React.useEffect(() => {
-        fetchCategorias()
         getData()
     }, []);
 
