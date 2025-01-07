@@ -7,6 +7,15 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          chart: ['recharts']
+        }
+      },
+    },
+  },
   plugins: [react()],
   resolve: {
     alias: {
