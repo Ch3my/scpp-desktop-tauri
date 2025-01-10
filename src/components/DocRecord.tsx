@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { CirclePlus } from "lucide-react"
+import { CirclePlus, Loader2 } from "lucide-react"
 import { Input } from './ui/input';
 import { DatePicker } from './DatePicker';
 import { DateTime } from 'luxon';
@@ -45,7 +45,9 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
 
     const { apiPrefix, sessionId, categorias, tipoDocs } = useAppState()
-
+    const [disableActions, setDisableActions] = useState<boolean>(false);
+    const [deleting, setDeleting] = useState<boolean>(false);
+    const [saving, setSaving] = useState<boolean>(false);
     const [monto, setMonto] = useState<number>(0);
     const [proposito, setProposito] = useState<string>('');
     const [fecha, setFecha] = useState<DateTime>(DateTime.now());
@@ -95,6 +97,8 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     }, [tipoDoc])
 
     const deleteDoc = async () => {
+        setDisableActions(true)
+        setDeleting(true)
         await fetch(`${apiPrefix}/documentos`, {
             method: 'DELETE',
             headers: {
@@ -105,16 +109,24 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
         }).then(response => response.json())
         // TODO handle error
         handleDialogChange(false);
+        setDisableActions(false)
+        setDeleting(false)
         toast('Documento Eliminado');
     }
 
     const handleSave = async () => {
+        setDisableActions(true)
+        setSaving(true)
         if (tipoDoc == 0) {
             toast('Debe seleccionar un tipo de documento');
+            setDisableActions(false)
+            setSaving(false)
             return
         }
         if (tipoDoc == 1 && !categoria) {
             toast('Debe seleccionar una categoria');
+            setDisableActions(false)
+            setSaving(false)
             return;
         }
         const payload: { id?: number; monto: number; proposito: string; fecha: string; fk_tipoDoc: number; fk_categoria: number | null; sessionHash: string } = {
@@ -145,6 +157,11 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
             toast('Documento Agregado');
         }
         handleDialogChange(false);
+        setTimeout(() => {
+            // Do not change until dialog closes
+            setSaving(false)
+            setDisableActions(false)
+        }, 100)
     };
 
     const handleDialogChange = (open: boolean) => {
@@ -220,11 +237,15 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                     </div>
                     <DialogFooter>
                         {id !== undefined && id > 0 && (
-                            <Button variant="destructive" onClick={deleteDoc}>
+                            <Button variant="destructive" onClick={deleteDoc} disabled={disableActions}>
+                                {deleting && <Loader2 className="animate-spin" />}
                                 Eliminar
                             </Button>
                         )}
-                        <Button onClick={handleSave}>{id ? 'Actualizar' : 'Guardar'}</Button>
+                        <Button onClick={handleSave} disabled={disableActions}>
+                            {saving && <Loader2 className="animate-spin" />}
+                            {id ? 'Actualizar' : 'Guardar'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
