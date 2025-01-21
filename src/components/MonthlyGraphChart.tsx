@@ -114,7 +114,7 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
                         />
                         <ChartTooltip
                             cursor={true}
-                            content={<ChartTooltipContent indicator="line" className="w-36" />}
+                            content={<ChartTooltipContent indicator="line" className="w-48 text-base" />}
                         />
                         {/* Gastos */}
                         <Line
