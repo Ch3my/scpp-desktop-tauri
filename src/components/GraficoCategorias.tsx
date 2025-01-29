@@ -54,7 +54,7 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
                 // Transform the raw data into the shape Recharts needs
                 // We’ll use the `data` array from the response:
                 // Each item has { label, data, catId }
-                const newChartData = result.data.slice(0, 7).map((item: any) => ({
+                const newChartData = result.data.slice(0, 9).map((item: any) => ({
                     category: item.label.slice(0, 6), // e.g. "Vivienda"
                     amount: item.data, // e.g. 4283327
                     catId: item.catId, // optional if you need it for any additional logic

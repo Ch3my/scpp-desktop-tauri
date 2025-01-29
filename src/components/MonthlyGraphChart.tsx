@@ -89,11 +89,11 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
     });
 
     return (
-        <div>
+        <div className="grid content-center">
             {isLoading && <Skeleton className="h-[40vh] w-full" />}
             {error && <p className="text-red-500">{error}</p>}
             {!isLoading && !error && chartData.length > 0 && (
-                <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
+                <ChartContainer config={chartConfig} className="aspect-video h-[40vh] w-full">
                     <LineChart
                         data={chartData}
                         margin={{ left: 12, right: 24, top: 24, bottom: 12 }}
@@ -147,7 +147,7 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
                 </ChartContainer>
             )}
             <div className="flex items-center justify-center text-muted-foreground">
-                <p>Historico financiero mensual</p>
+                <p>Historico financiero 13 meses</p>
             </div>
         </div>
     )

@@ -30,6 +30,7 @@ import {
 import MonthlyGraphChart from '@/components/MonthlyGraphChart';
 import GraficoCategorias from '@/components/GraficoCategorias';
 import UsagePercentage from '@/components/UsagePercentaje';
+import CategoriasRadial from '@/components/CategoriasRadial';
 
 
 const Dashboard: React.FC = () => {
@@ -45,6 +46,7 @@ const Dashboard: React.FC = () => {
     const [openDocDialog, setOpenDocDialog] = useState<boolean>(false);
     const monthlyChartRef = useRef<{ refetchData?: () => void }>(null)
     const barChartRef = useRef<{ refetchData?: () => void }>(null)
+    const radarChartRef = useRef<{ refetchData?: () => void }>(null)
     const percentageRef = useRef<{ refetchData?: () => void }>(null)
 
     const getData = async (paramsOverride?: { fechaInicio?: DateTime, fechaTermino?: DateTime, categoria?: number, searchPhrase?: string, tipoDoc?: number }) => {
@@ -91,6 +93,7 @@ const Dashboard: React.FC = () => {
             monthlyChartRef.current?.refetchData?.()
             barChartRef.current?.refetchData?.()
             percentageRef.current?.refetchData?.()
+            radarChartRef.current?.refetchData?.()
             getData()
         }
     }
@@ -206,8 +209,12 @@ const Dashboard: React.FC = () => {
                         <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
                     </div>
                 </div>
-                <div className="border h-full rounded-lg">
-                    <MonthlyGraphChart ref={monthlyChartRef} />
+                <div className="grid grid-cols-2 gap-2" style={{ gridTemplateColumns: '3fr 2fr' }}>
+                    <div className="border h-full rounded-lg">
+                        <MonthlyGraphChart ref={monthlyChartRef} />
+                    </div>
+                    <CategoriasRadial ref={radarChartRef} />
+
                 </div>
             </div>
         </div>
