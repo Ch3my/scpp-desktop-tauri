@@ -20,7 +20,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
-    const [fechaInicio, setFechaInicio] = useState(DateTime.now());
+    const [fechaInicio, _] = useState(DateTime.now());
     const { apiPrefix, sessionId } = useAppState();
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(false)
