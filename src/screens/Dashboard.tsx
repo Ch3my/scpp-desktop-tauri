@@ -28,9 +28,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import MonthlyGraphChart from '@/components/MonthlyGraphChart';
-import GraficoCategorias from '@/components/GraficoCategorias';
+// import GraficoCategorias from '@/components/GraficoCategorias';
 import UsagePercentage from '@/components/UsagePercentaje';
 import CategoriasRadial from '@/components/CategoriasRadial';
+import YearlySum from '@/components/YearlySum';
+import GraficoCategoriasNew from '@/components/GraficoCategoriasNew';
 
 
 const Dashboard: React.FC = () => {
@@ -48,6 +50,7 @@ const Dashboard: React.FC = () => {
     const barChartRef = useRef<{ refetchData?: () => void }>(null)
     const radarChartRef = useRef<{ refetchData?: () => void }>(null)
     const percentageRef = useRef<{ refetchData?: () => void }>(null)
+    const yearlySumRef = useRef<{ refetchData?: () => void }>(null)
 
     const getData = async (paramsOverride?: { fechaInicio?: DateTime, fechaTermino?: DateTime, categoria?: number, searchPhrase?: string, tipoDoc?: number }) => {
         let params = new URLSearchParams();
@@ -94,6 +97,7 @@ const Dashboard: React.FC = () => {
             barChartRef.current?.refetchData?.()
             percentageRef.current?.refetchData?.()
             radarChartRef.current?.refetchData?.()
+            yearlySumRef.current?.refetchData?.()
             getData()
         }
     }
@@ -202,19 +206,15 @@ const Dashboard: React.FC = () => {
                     </Table>
                 </div>
             </div>
-            <div className="grid grid-rows-2 gap-2">
-                <div className="grid gap-2 items-center" style={{ gridTemplateColumns: '2fr 4fr' }}>
+            <div className="grid gap-2">
+                <div className="grid gap-2 items-center grid-cols-3" >
                     <UsagePercentage ref={percentageRef} />
-                    <div className="border h-full rounded-lg ">
-                        <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2" style={{ gridTemplateColumns: '3fr 2fr' }}>
-                    <div className="border h-full rounded-lg">
-                        <MonthlyGraphChart ref={monthlyChartRef} />
-                    </div>
+                    <YearlySum ref={yearlySumRef}/>
                     <CategoriasRadial ref={radarChartRef} />
-
+                </div>
+                <div className="grid gap-2" style={{ gridTemplateColumns: '5fr 3fr' }}>
+                    <MonthlyGraphChart ref={monthlyChartRef} />
+                    <GraficoCategoriasNew onBarClick={(e) => onBarClick(e)} ref={barChartRef}/>
                 </div>
             </div>
         </div>

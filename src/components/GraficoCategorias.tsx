@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/chart";
 import { Skeleton } from "./ui/skeleton";
 import numeral from "numeral";
+import { Card } from "./ui/card";
 
 const chartConfig = {
     desktop: {
@@ -54,7 +55,7 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
                 // Transform the raw data into the shape Recharts needs
                 // We’ll use the `data` array from the response:
                 // Each item has { label, data, catId }
-                const newChartData = result.data.slice(0, 9).map((item: any) => ({
+                const newChartData = result.data.slice(0, 8).map((item: any) => ({
                     category: item.label.slice(0, 6), // e.g. "Vivienda"
                     amount: item.data, // e.g. 4283327
                     catId: item.catId, // optional if you need it for any additional logic
@@ -84,11 +85,11 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
         };
 
         return (
-            <div>
+            <Card >
                 {isLoading ? (
-                    <Skeleton className="h-[40vh] w-full" />
+                    <Skeleton className="h-[50vh] w-full" />
                 ) : (
-                    <ChartContainer config={chartConfig} className="aspect-auto h-[40vh] w-full">
+                    <ChartContainer config={chartConfig} className="aspect-auto h-[50vh] w-full">
                         <BarChart accessibilityLayer data={chartData} >
                             <CartesianGrid vertical={false} />
                             <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
@@ -124,7 +125,7 @@ const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProp
                 <div className="flex items-center justify-center text-muted-foreground">
                     <p>Resumen categoría 13 Meses</p>
                 </div>
-            </div>
+            </Card>
         );
     }
 )

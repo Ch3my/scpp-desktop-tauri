@@ -11,6 +11,7 @@ import { useAppState } from "@/AppState"
 import { fetch } from "@tauri-apps/plugin-http";
 import numeral from "numeral"
 import { Skeleton } from "./ui/skeleton"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 const chartConfig = {
     desktop: {
@@ -67,39 +68,44 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
     }))
 
     return (
-        <div className='border rounded-lg p-2 flex flex-col h-full justify-center' >
-            {isLoading ? (
-                <Skeleton className="h-full w-full rounded-full" />
-            ) : (
-                <>
-                    <ChartContainer
-                        config={chartConfig}
-                        className="mx-auto aspect-auto h-full w-full"
-                    >
-                        <RadarChart data={chartData}>
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent className="text-base" formatter={(value) => <p>$ {numeral(value).format("0,0")}</p>} />}
-                            />
-                            <PolarGrid gridType="circle" />
-                            <PolarAngleAxis dataKey="category" />
-                            <Radar
-                                dataKey="amount"
-                                fill="var(--color-desktop)"
-                                fillOpacity={0.6}
-                                dot={{
-                                    r: 4,
-                                    fillOpacity: 1,
-                                }}
-                            />
-                        </RadarChart>
-                    </ChartContainer>
-                    <div className="flex items-center justify-center text-muted-foreground">
+        <Card className="h-full">
+            <CardHeader>
+                <CardTitle>Categorias {fechaInicio.toFormat("MMMM")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <Skeleton className="aspect-square rounded-full" />
+                ) : (
+                    <>
+                        <ChartContainer
+                            config={chartConfig}
+                            className="aspect-square"
+                        >
+                            <RadarChart data={chartData}>
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent className="text-base" formatter={(value) => <p>$ {numeral(value).format("0,0")}</p>} />}
+                                />
+                                <PolarGrid gridType="circle" />
+                                <PolarAngleAxis dataKey="category" />
+                                <Radar
+                                    dataKey="amount"
+                                    fill="var(--color-desktop)"
+                                    fillOpacity={0.6}
+                                    dot={{
+                                        r: 4,
+                                        fillOpacity: 1,
+                                    }}
+                                />
+                            </RadarChart>
+                        </ChartContainer>
+                        {/* <div className="flex items-center justify-center text-muted-foreground">
                         <p>Categorias {fechaInicio.toFormat("MMMM")}</p>
-                    </div>
-                </>
-            )}
-        </div>
+                    </div> */}
+                    </>
+                )}
+            </CardContent>
+        </Card>
     )
 }
 

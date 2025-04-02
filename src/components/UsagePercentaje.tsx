@@ -3,6 +3,7 @@ import { fetch } from "@tauri-apps/plugin-http"
 import { useAppState } from "@/AppState"
 import numeral from 'numeral';
 import { Skeleton } from './ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     const [percentage, setPercentage] = useState<number>(0);
@@ -21,7 +22,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
             }
         }).then(response => response.json())
         setTopGastos(response.topGastos.slice(0, 5))
-        setPercentage(parseInt(response.porcentajeUsado))
+        setPercentage(response.porcentajeUsado)
         setIsLoading(false)
     };
 
@@ -37,35 +38,42 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     }))
 
     return (
-        <div className='border rounded-lg p-2 flex flex-col gap-4 h-full justify-center'  >
-            {isLoading ? (
-                   <div className="flex flex-col space-y-3">
-                   <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-                   <div className="space-y-2">
-                     <Skeleton className="h-4 w-[250px]" />
-                     <Skeleton className="h-4 w-[200px]" />
-                   </div>
-                 </div>
-            ) : (
-                <div className='flex flex-col gap-8'>
-                    <div className="flex items-center justify-center flex-col">
-                        <p className='text-5xl font-bold'>{percentage}%</p>
-                        <p className='text-muted-foreground'>Ingresos mes usado</p>
+        <Card className='h-full'  >
+            <CardHeader>
+                <CardDescription>Gasto mes</CardDescription>
+                <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                    {numeral(percentage).format("0,0.00")}%
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <div className="flex flex-col space-y-3">
+                        <Skeleton className="h-[125px] w-full rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-[200px]" />
+                            <Skeleton className="h-4 w-[150px]" />
+                        </div>
                     </div>
+                ) : (
                     <div>
-                        {topGastos.map((gasto, index) => (
-                            <div key={index} className="flex justify-between w-full">
-                                <span>{gasto.proposito}</span>
-                                <span>{numeral(gasto.monto).format('$0,0')}</span>
+                        <div className="text-muted-foreground">
+                            Top Gastos
+                        </div>
+                        <div className='flex flex-col gap-8'>
+                            <div>
+                                {topGastos.map((gasto, index) => (
+                                    <div key={index} className="flex justify-between w-full">
+                                        <span>{gasto.proposito}</span>
+                                        <span>{numeral(gasto.monto).format('$0,0')}</span>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                        <p className='text-muted-foreground text-center'>Top Gastos</p>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </CardContent>
+        </Card>
     );
 };
 
-// export default UsagePercentage;
 export default forwardRef(UsagePercentage)

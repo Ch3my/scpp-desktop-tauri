@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "SCPP Tauri",
-        "width": 1360,
-        "height": 700,
+        "width": 1280,
+        "height": 720,
         "visible": false,
         "center": true
       }
