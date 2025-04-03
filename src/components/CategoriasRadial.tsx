@@ -11,7 +11,7 @@ import { useAppState } from "@/AppState"
 import { fetch } from "@tauri-apps/plugin-http";
 import numeral from "numeral"
 import { Skeleton } from "./ui/skeleton"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 const chartConfig = {
     desktop: {
@@ -44,7 +44,7 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
             );
             const result = await response.json();
             const newChartData = result.data.slice(0, 6).map((item: any) => ({
-                category: item.label.slice(0, 6),
+                category: item.label,
                 amount: item.data, // e.g. 4283327
                 catId: item.catId, // optional if you need it for any additional logic
             }));
@@ -71,15 +71,16 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
         <Card className="h-full">
             <CardHeader>
                 <CardTitle>Categorias {fechaInicio.toFormat("MMMM")}</CardTitle>
+                <CardDescription>6 categorias principales</CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
-                    <Skeleton className="aspect-square rounded-full" />
+                    <Skeleton className="aspect-video rounded-full" />
                 ) : (
                     <>
                         <ChartContainer
                             config={chartConfig}
-                            className="aspect-square"
+                            className="aspect-video"
                         >
                             <RadarChart data={chartData}>
                                 <ChartTooltip
@@ -99,12 +100,10 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
                                 />
                             </RadarChart>
                         </ChartContainer>
-                        {/* <div className="flex items-center justify-center text-muted-foreground">
-                        <p>Categorias {fechaInicio.toFormat("MMMM")}</p>
-                    </div> */}
                     </>
                 )}
             </CardContent>
+
         </Card>
     )
 }

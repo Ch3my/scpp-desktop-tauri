@@ -207,7 +207,7 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
             <div className="grid gap-2">
-                <div className="grid gap-2 items-center grid-cols-3" >
+                <div className="grid gap-2 items-center" style={{gridTemplateColumns: "3fr 2fr 4fr"}} >
                     <UsagePercentage ref={percentageRef} />
                     <YearlySum ref={yearlySumRef}/>
                     <CategoriasRadial ref={radarChartRef} />
