@@ -21,7 +21,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                 'Content-Type': 'application/json'
             }
         }).then(response => response.json())
-        setTopGastos(response.topGastos.slice(0, 7))
+        setTopGastos(response.topGastos.slice(0, 6))
         setPercentage(response.porcentajeUsado)
         setIsLoading(false)
     };
