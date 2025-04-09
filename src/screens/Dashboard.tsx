@@ -32,7 +32,7 @@ import MonthlyGraphChart from '@/components/MonthlyGraphChart';
 import UsagePercentage from '@/components/UsagePercentaje';
 import CategoriasRadial from '@/components/CategoriasRadial';
 import YearlySum from '@/components/YearlySum';
-import GraficoCategoriasNew from '@/components/GraficoCategoriasNew';
+import GraficoCategorias from '@/components/GraficoCategorias';
 
 
 const Dashboard: React.FC = () => {
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
     }, []);
 
     return (
-        <div className="grid gap-4 p-2 w-screen h-screen grid-docs-layout" >
+        <div className="grid gap-4 p-2 w-screen h-screen grid-docs-layout overflow-hidden" >
             <div className="flex flex-col gap-2 overflow-auto">
                 <ScreenTitle title="Dashboard" />
                 <div className='flex gap-2'>
@@ -214,7 +214,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="grid gap-2" style={{ gridTemplateColumns: '5fr 3fr' }}>
                     <MonthlyGraphChart ref={monthlyChartRef} />
-                    <GraficoCategoriasNew onBarClick={(e) => onBarClick(e)} ref={barChartRef}/>
+                    <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef}/>
                 </div>
             </div>
         </div>

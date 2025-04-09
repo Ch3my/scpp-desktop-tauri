@@ -40,13 +40,9 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
         ahorrosDataset: [],
     })
 
-    const [error, setError] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
 
     const fetchData = useCallback(async () => {
-        setIsLoading(true)
-        setError(null)
-
         try {
             let params = new URLSearchParams();
             params.set("sessionHash", sessionId);
@@ -61,9 +57,10 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
             setMonthlyGraphData(response)
         } catch (err: any) {
             console.error("Error fetching data:", err)
-            setError("Failed to load chart data.")
         } finally {
-            setIsLoading(false)
+            if (isLoading) {
+                setIsLoading(false)
+            }
         }
     }, [apiPrefix, sessionId])
 
@@ -89,6 +86,20 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
         };
     });
 
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Historico financiero</CardTitle>
+                    <CardDescription>13 meses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-[20vh] w-full" />
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -96,62 +107,59 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
                 <CardDescription>13 meses</CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading && <Skeleton className="h-[20vh] w-full" />}
-                {error && <p className="text-red-500">{error}</p>}
-                {!isLoading && !error && chartData.length > 0 && (
-                    <ChartContainer config={chartConfig} className="aspect-video">
-                        <LineChart
-                            data={chartData}
-                            margin={{ left: 12, right: 24, top: 24, bottom: 12 }}
-                            accessibilityLayer
-                        >
-                            <CartesianGrid vertical={false} />
-                            <XAxis
-                                dataKey="month"
-                                tickLine={false}
-                                axisLine={false}
-                                tickMargin={8}
-                            />
-                            <YAxis
-                                domain={[0, "auto"]}
-                                tickFormatter={(value) =>
-                                    new Intl.NumberFormat("en-US").format(value)
-                                }
-                            />
-                            <ChartTooltip
-                                cursor={true}
-                                content={<ChartTooltipContent indicator="line" className="w-48 text-base" />}
-                            />
-                            {/* Gastos */}
-                            <Line
-                                dataKey="gastos"
-                                type="monotone"
-                                stroke="var(--color-gastos)"
-                                strokeWidth={2}
-                                dot={{ fill: "var(--color-gastos)" }}
-                                activeDot={{ r: 6 }}
-                            />
-                            {/* Ingresos */}
-                            <Line
-                                dataKey="ingresos"
-                                type="monotone"
-                                stroke="var(--color-ingresos)"
-                                strokeWidth={2}
-                                dot={{ fill: "var(--color-ingresos)" }}
-                                activeDot={{ r: 6 }}
-                            />
-                            {/* Ahorros */}
-                            <Line
-                                dataKey="ahorros"
-                                type="monotone"
-                                stroke="var(--color-ahorros)"
-                                strokeWidth={2}
-                                dot={{ fill: "var(--color-ahorros)" }}
-                                activeDot={{ r: 6 }}
-                            />
-                        </LineChart>
-                    </ChartContainer>
-                )}
+
+                <ChartContainer config={chartConfig} className="aspect-video">
+                    <LineChart
+                        data={chartData}
+                        margin={{ left: 12, right: 24, top: 24, bottom: 12 }}
+                        accessibilityLayer
+                    >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                            dataKey="month"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                        />
+                        <YAxis
+                            domain={[0, "auto"]}
+                            tickFormatter={(value) =>
+                                new Intl.NumberFormat("en-US").format(value)
+                            }
+                        />
+                        <ChartTooltip
+                            cursor={true}
+                            content={<ChartTooltipContent indicator="line" className="w-48 text-base" />}
+                        />
+                        {/* Gastos */}
+                        <Line
+                            dataKey="gastos"
+                            type="monotone"
+                            stroke="var(--color-gastos)"
+                            strokeWidth={2}
+                            dot={{ fill: "var(--color-gastos)" }}
+                            activeDot={{ r: 6 }}
+                        />
+                        {/* Ingresos */}
+                        <Line
+                            dataKey="ingresos"
+                            type="monotone"
+                            stroke="var(--color-ingresos)"
+                            strokeWidth={2}
+                            dot={{ fill: "var(--color-ingresos)" }}
+                            activeDot={{ r: 6 }}
+                        />
+                        {/* Ahorros */}
+                        <Line
+                            dataKey="ahorros"
+                            type="monotone"
+                            stroke="var(--color-ahorros)"
+                            strokeWidth={2}
+                            dot={{ fill: "var(--color-ahorros)" }}
+                            activeDot={{ r: 6 }}
+                        />
+                    </LineChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     )

@@ -21,7 +21,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                 'Content-Type': 'application/json'
             }
         }).then(response => response.json())
-        setTopGastos(response.topGastos.slice(0, 5))
+        setTopGastos(response.topGastos.slice(0, 7))
         setPercentage(response.porcentajeUsado)
         setIsLoading(false)
     };
@@ -37,6 +37,28 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
         },
     }))
 
+    if (isLoading) {
+        return (
+            <Card className='h-full'  >
+                <CardHeader>
+                    <CardDescription>Gasto mes</CardDescription>
+                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                        {numeral(percentage).format("0,0.00")}%
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col space-y-3">
+                        <Skeleton className="h-[100px] w-full rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-[200px]" />
+                            <Skeleton className="h-4 w-[150px]" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <Card className='h-full'  >
             <CardHeader>
@@ -45,32 +67,22 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                     {numeral(percentage).format("0,0.00")}%
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <div className="flex flex-col space-y-3">
-                        <Skeleton className="h-[125px] w-full rounded-xl" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-[200px]" />
-                            <Skeleton className="h-4 w-[150px]" />
+            <CardContent className='text-sm'>
+                <div>
+                    <div className="text-muted-foreground">
+                        Top Gastos
+                    </div>
+                    <div className='flex flex-col gap-8 truncate'>
+                        <div>
+                            {topGastos.map((gasto, index) => (
+                                <div key={index} className="flex justify-between w-full">
+                                    <span className="truncate block max-w-[8rem]">{gasto.proposito}</span>
+                                    <span>{numeral(gasto.monto).format('$0,0')}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                ) : (
-                    <div>
-                        <div className="text-muted-foreground">
-                            Top Gastos
-                        </div>
-                        <div className='flex flex-col gap-8'>
-                            <div>
-                                {topGastos.map((gasto, index) => (
-                                    <div key={index} className="flex justify-between w-full">
-                                        <span>{gasto.proposito}</span>
-                                        <span>{numeral(gasto.monto).format('$0,0')}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
+                </div>
             </CardContent>
         </Card>
     );

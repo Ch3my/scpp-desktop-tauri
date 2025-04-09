@@ -24,11 +24,10 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
     const [fechaInicio, _] = useState(DateTime.now());
     const { apiPrefix, sessionId } = useAppState();
     const [chartData, setChartData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
 
     const fetchData = async () => {
         try {
-            setIsLoading(true)
             const params = new URLSearchParams();
             params.set("sessionHash", sessionId);
             params.set("nMonths", "0");
@@ -53,7 +52,9 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
         } catch (error) {
             console.error("Error fetching chart data:", error);
         }
-        setIsLoading(false)
+        if (isLoading) {
+            setIsLoading(false)
+        }
     };
 
     useEffect(() => {
@@ -67,6 +68,18 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
         },
     }))
 
+    if (isLoading) {
+        <Card className="h-full">
+            <CardHeader>
+                <CardTitle>Categorias {fechaInicio.toFormat("MMMM")}</CardTitle>
+                <CardDescription>6 categorias principales</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="aspect-video rounded-full" />
+            </CardContent>
+        </Card>
+    }
+
     return (
         <Card className="h-full">
             <CardHeader>
@@ -74,36 +87,29 @@ function CategoriasRadial(_props: unknown, ref: React.Ref<unknown>) {
                 <CardDescription>6 categorias principales</CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading ? (
-                    <Skeleton className="aspect-video rounded-full" />
-                ) : (
-                    <>
-                        <ChartContainer
-                            config={chartConfig}
-                            className="aspect-video"
-                        >
-                            <RadarChart data={chartData}>
-                                <ChartTooltip
-                                    cursor={false}
-                                    content={<ChartTooltipContent className="text-base" formatter={(value) => <p>$ {numeral(value).format("0,0")}</p>} />}
-                                />
-                                <PolarGrid gridType="circle" />
-                                <PolarAngleAxis dataKey="category" />
-                                <Radar
-                                    dataKey="amount"
-                                    fill="var(--color-desktop)"
-                                    fillOpacity={0.6}
-                                    dot={{
-                                        r: 4,
-                                        fillOpacity: 1,
-                                    }}
-                                />
-                            </RadarChart>
-                        </ChartContainer>
-                    </>
-                )}
+                <ChartContainer
+                    config={chartConfig}
+                    className="aspect-video"
+                >
+                    <RadarChart data={chartData}>
+                        <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent className="text-base" formatter={(value) => <p>$ {numeral(value).format("0,0")}</p>} />}
+                        />
+                        <PolarGrid gridType="circle" />
+                        <PolarAngleAxis dataKey="category" />
+                        <Radar
+                            dataKey="amount"
+                            fill="var(--color-desktop)"
+                            fillOpacity={0.6}
+                            dot={{
+                                r: 4,
+                                fillOpacity: 1,
+                            }}
+                        />
+                    </RadarChart>
+                </ChartContainer>
             </CardContent>
-
         </Card>
     )
 }

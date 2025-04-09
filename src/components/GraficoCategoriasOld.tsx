@@ -1,24 +1,20 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { fetch } from "@tauri-apps/plugin-http";
 import { useAppState } from "@/AppState";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 import {
-    ChartConfig,
     ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Skeleton } from "./ui/skeleton";
 import numeral from "numeral";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Card } from "./ui/card";
 
 const chartConfig = {
     desktop: {
         label: "Desktop",
         color: "hsl(var(--chart-1))",
     },
-} satisfies ChartConfig
-
+};
 
 interface GraficoCategoriasProps {
     onBarClick?: (catId: number) => void;
@@ -29,17 +25,18 @@ export interface GraficoCategoriasRef {
 }
 
 
-const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasProps>(
+// function GraficoCategorias(_props: unknown, ref: React.Ref<unknown>) {
+const GraficoCategorias = forwardRef<GraficoCategoriasRef, GraficoCategoriasProps>(
     function GraficoCategorias(props, ref) {
         const { onBarClick } = props;
         const [chartData, setChartData] = useState([]);
-        const [isLoading, setIsLoading] = useState(true)
+        const [isLoading, setIsLoading] = useState(false)
         const [hover, setHover] = useState<number | null>(null)
         const { apiPrefix, sessionId } = useAppState();
 
         const fetchData = async () => {
             try {
-                // setIsLoading(true)
+                setIsLoading(true)
                 const params = new URLSearchParams();
                 params.set("sessionHash", sessionId);
                 params.set("nMonths", "13");
@@ -59,7 +56,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
                 // We’ll use the `data` array from the response:
                 // Each item has { label, data, catId }
                 const newChartData = result.data.slice(0, 8).map((item: any) => ({
-                    category: item.label, // e.g. "Vivienda"
+                    category: item.label.slice(0, 6), // e.g. "Vivienda"
                     amount: item.data, // e.g. 4283327
                     catId: item.catId, // optional if you need it for any additional logic
                 }));
@@ -68,9 +65,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
             } catch (error) {
                 console.error("Error fetching chart data:", error);
             }
-            if (isLoading) {
-                setIsLoading(false)
-            }
+            setIsLoading(false)
         };
 
         useImperativeHandle(ref, () => ({
@@ -89,50 +84,16 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
             }
         };
 
-        if (isLoading) {
-            return (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Gastos por Categorias</CardTitle>
-                        <CardDescription>13 meses</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Skeleton className="aspect-square" />
-                    </CardContent>
-                </Card>
-            )
-        }
-
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Gastos por Categorias</CardTitle>
-                    <CardDescription>13 meses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="aspect-square">
-                        <BarChart
-                            accessibilityLayer
-                            data={chartData}
-                            layout="vertical"
-                            margin={{
-                                left: 50,
-                            }}
-                        >
-                            <XAxis type="number" dataKey="amount" hide />
-                            <YAxis
-                                dataKey="category"
-                                type="category"
-                                tickLine={false}
-                                tickMargin={10}
-                                axisLine={false}
-                            />
-                            <ChartTooltip
-                                cursor={false}
-                                position={{ x: 70, y: -70 }}
-                                content={<ChartTooltipContent className="w-48 text-base" formatter={(o: any) => (<div>{numeral(o).format("0,0")}</div>)} />}
-                            />
-                            <Bar dataKey="amount" fill="var(--color-desktop)" onClick={handleBarClick} shape={(props: any) => {
+            <Card >
+                {isLoading ? (
+                    <Skeleton className="h-[50vh] w-full" />
+                ) : (
+                    <ChartContainer config={chartConfig} className="aspect-auto h-[50vh] w-full">
+                        <BarChart accessibilityLayer data={chartData} >
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
+                            <Bar dataKey="amount" fill="var(--color-desktop)" radius={8} onClick={handleBarClick} shape={(props: any) => {
                                 return (<rect
                                     fill={props.fill}
                                     height={props.height}
@@ -148,12 +109,24 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
                                     rx={5}
                                 />
                                 )
-                            }} />
+                            }}>
+                                <LabelList
+                                    dataKey="amount"
+                                    position="top"
+                                    offset={12}
+                                    className="fill-foreground"
+                                    fontSize={12}
+                                    formatter={(value: number) => numeral(value).format("0,0")}
+                                />
+                            </Bar>
                         </BarChart>
                     </ChartContainer>
-                </CardContent>
+                )}
+                <div className="flex items-center justify-center text-muted-foreground">
+                    <p>Resumen categoría 13 Meses</p>
+                </div>
             </Card>
-        )
+        );
     }
 )
-export default GraficoCategoriasNew;
+export default GraficoCategorias;
