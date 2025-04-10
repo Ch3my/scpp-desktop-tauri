@@ -3,7 +3,7 @@ import { fetch } from "@tauri-apps/plugin-http"
 import { useAppState } from "@/AppState"
 import numeral from 'numeral';
 import { Skeleton } from './ui/skeleton';
-import { ArrowBigDownDash, ArrowBigUpDash, BanknoteArrowDown, BanknoteArrowUp, Minus } from 'lucide-react';
+import { ArrowBigDownDash, ArrowBigUpDash, Minus } from 'lucide-react';
 import { CardHeader, CardDescription, CardTitle, Card, CardContent } from './ui/card';
 
 function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
@@ -89,31 +89,20 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
           </div>
           <div className='text-right'>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              {numeral(utilidadAnual).format("0,0.00")}%
+              {numeral(utilidadAnual).format("0,0.0")}%
             </CardTitle>
             <span className='text-sm'>${numeral(montoUtilidad).format("0,0")}</span>
           </div>
         </div>
       </CardHeader>
-      <CardContent className='text-sm'>
-        <div className="text-muted-foreground">
-          Montos 13 meses
+      <CardContent className='grid gap-2'>
+        <div>
+          <p className="text-muted-foreground">Ingresos</p>
+          <p>${numeral(ingresoSum).format("0,0")}</p>
         </div>
-        <div className='grid grid-cols-2 justify-between'>
-          <span title='Ingresos'>
-            <BanknoteArrowUp className='text-green-600' />
-          </span>
-          <span>
-            {numeral(ingresoSum).format("0,0")}
-          </span>
-        </div>
-        <div className='grid grid-cols-2 justify-between'>
-          <span title='Gastos'>
-            <BanknoteArrowDown className='text-red-600'/>
-          </span>
-          <span>
-            {numeral(gastoSum).format("0,0")}
-          </span>
+        <div>
+          <p className="text-muted-foreground">Egresos</p>
+          <p>${numeral(gastoSum).format("0,0")}</p>
         </div>
       </CardContent>
     </Card>

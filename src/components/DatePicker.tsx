@@ -32,8 +32,8 @@ export const DatePicker: React.FC<DatePickerProps & { className?: string }> = ({
     };
 
     return (
-        <Popover>
-            <PopoverTrigger asChild>
+        <Popover modal>
+            <PopoverTrigger>
                 <Button
                     variant={"outline"}
                     className={cn(
