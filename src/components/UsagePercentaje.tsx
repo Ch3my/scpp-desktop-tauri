@@ -40,10 +40,10 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     if (isLoading) {
         return (
             <Card className='h-full'  >
-                <CardHeader>
+                <CardHeader className='text-center'>
                     <CardDescription>Gasto mes</CardDescription>
                     <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                        {numeral(percentage).format("0,0.00")}%
+                        {numeral(percentage).format("0,0.0")}%
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
