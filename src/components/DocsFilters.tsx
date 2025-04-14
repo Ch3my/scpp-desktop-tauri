@@ -22,6 +22,7 @@ import {
     SelectItem,
 } from "@/components/ui/select"
 import { DatePicker } from "./DatePicker";
+import { Checkbox } from "./ui/checkbox";
 
 interface FilterDialogProps {
     // Parent passes in Luxon `DateTime` objects
@@ -34,12 +35,15 @@ interface FilterDialogProps {
     // `searchPhrase` is a string
     searchPhrase: string
 
+    searchPhraseIgnoreOtherFilters: boolean
+
     // Emitted back to parent when user clicks "OK"
     onFiltersChange: (filters: {
         fechaInicio: DateTime
         fechaTermino: DateTime
         categoria: number
         searchPhrase: string
+        searchPhraseIgnoreOtherFilters: boolean
     }) => void
 }
 
@@ -48,6 +52,7 @@ export function DocsFilters({
     fechaTermino,
     categoria,
     searchPhrase,
+    searchPhraseIgnoreOtherFilters,
     onFiltersChange,
 }: FilterDialogProps) {
     const [open, setOpen] = React.useState(false)
@@ -56,6 +61,7 @@ export function DocsFilters({
     const [localFechaTermino, setLocalFechaTermino] = React.useState<DateTime>(fechaTermino)
     const [localCategoria, setLocalCategoria] = React.useState<number>(categoria)
     const [localSearchPhrase, setLocalSearchPhrase] = React.useState<string>(searchPhrase)
+    const [localSearchPhraseIgnoreOtherFilters, setLocalSearchPhraseIgnoreOtherFilters] = React.useState<boolean>(true)
 
     // Keep local state in sync if the parent props change
     React.useEffect(() => {
@@ -74,12 +80,17 @@ export function DocsFilters({
         setLocalSearchPhrase(searchPhrase)
     }, [searchPhrase])
 
+    React.useEffect(() => {
+        setLocalSearchPhraseIgnoreOtherFilters(searchPhraseIgnoreOtherFilters)
+    }, [searchPhraseIgnoreOtherFilters])
+
     const handleOk = () => {
         onFiltersChange({
             fechaInicio: localFechaInicio,
             fechaTermino: localFechaTermino,
             categoria: localCategoria,
             searchPhrase: localSearchPhrase,
+            searchPhraseIgnoreOtherFilters: localSearchPhraseIgnoreOtherFilters
         })
         setOpen(false)
     }
@@ -104,12 +115,19 @@ export function DocsFilters({
                     <Label htmlFor="search-phrase">
                         Buscar
                     </Label>
-                    <Input
-                        id="search-phrase"
-                        placeholder="Palabras clave..."
-                        value={localSearchPhrase}
-                        onChange={(e) => setLocalSearchPhrase(e.target.value)}
-                    />
+                    <div>
+                        <Input
+                            id="search-phrase"
+                            placeholder="Palabras clave..."
+                            value={localSearchPhrase}
+                            onChange={(e) => setLocalSearchPhrase(e.target.value)}
+                            className="mb-2"
+                        />
+                        <div className="flex items-center gap-2">
+                            <Checkbox checked={localSearchPhraseIgnoreOtherFilters} onCheckedChange={(o) => setLocalSearchPhraseIgnoreOtherFilters(Boolean(o))} />
+                            <p className="text-muted-foreground text-sm">Ignora otros Filtros</p>
+                        </div>
+                    </div>
                     <Label htmlFor="fecha-inicio">
                         Fecha Inicio
                     </Label>

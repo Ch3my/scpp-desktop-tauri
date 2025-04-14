@@ -44,6 +44,9 @@ const Dashboard: React.FC = () => {
     const [selectedDocId, setSelectedDocId] = useState<number>(0);
     const [totalDocs, setTotalDocs] = useState<number>(0);
     const [searchPhrase, setSearchPhrase] = useState<string>('');
+    const [searchPhraseIgnoreOtherFilters, setSearchPhraseIgnoreOtherFilters] = useState<boolean>(true)
+    const [apiCalling, setApiCalling] = useState<boolean>(true)
+
     const [docs, setDocs] = useState<any[]>([]);
     const [openDocDialog, setOpenDocDialog] = useState<boolean>(false);
     const monthlyChartRef = useRef<{ refetchData?: () => void }>(null)
@@ -52,13 +55,15 @@ const Dashboard: React.FC = () => {
     const percentageRef = useRef<{ refetchData?: () => void }>(null)
     const yearlySumRef = useRef<{ refetchData?: () => void }>(null)
 
-    const getData = async (paramsOverride?: { fechaInicio?: DateTime, fechaTermino?: DateTime, categoria?: number, searchPhrase?: string, tipoDoc?: number }) => {
+    const getData = async (paramsOverride?: { fechaInicio?: DateTime, fechaTermino?: DateTime, categoria?: number, searchPhrase?: string, tipoDoc?: number, searchPhraseIgnoreOtherFilters?: boolean }) => {
+        setApiCalling(true)
         let params = new URLSearchParams();
         params.set("sessionHash", sessionId);
         params.set("fechaInicio", (paramsOverride?.fechaInicio || fechaInicio)?.toFormat('yyyy-MM-dd'));
         params.set("fechaTermino", (paramsOverride?.fechaTermino || fechaTermino)?.toFormat('yyyy-MM-dd'));
         params.set("searchPhrase", paramsOverride?.searchPhrase !== undefined ? paramsOverride.searchPhrase : searchPhrase);
         params.set("fk_tipoDoc", (paramsOverride?.tipoDoc || selectedTipoDoc).toString());
+        params.set("searchPhraseIgnoreOtherFilters", (paramsOverride?.searchPhraseIgnoreOtherFilters || searchPhraseIgnoreOtherFilters).toString());
 
         // Extract the category value, prioritizing paramsOverride if it exists
         const categoria = paramsOverride?.categoria ?? selectedCategoria;
@@ -74,18 +79,21 @@ const Dashboard: React.FC = () => {
         }).then(response => response.json())
         setDocs(data);
         setTotalDocs(data.reduce((acc: number, doc: any) => acc + doc.monto, 0))
+        setApiCalling(false)
     }
 
-    const handleFiltersChange = (filters: { fechaInicio: DateTime; fechaTermino: DateTime; categoria: number; searchPhrase: string; }) => {
+    const handleFiltersChange = (filters: { fechaInicio: DateTime; fechaTermino: DateTime; categoria: number; searchPhrase: string; searchPhraseIgnoreOtherFilters: boolean }) => {
         setFechaInicio(filters.fechaInicio)
         setFechaTermino(filters.fechaTermino)
         setSelectedCategoria(filters.categoria)
         setSearchPhrase(filters.searchPhrase)
+        setSearchPhraseIgnoreOtherFilters(filters.searchPhraseIgnoreOtherFilters)
         getData({
             fechaInicio: filters.fechaInicio,
             fechaTermino: filters.fechaTermino,
             categoria: filters.categoria,
-            searchPhrase: filters.searchPhrase
+            searchPhrase: filters.searchPhrase,
+            searchPhraseIgnoreOtherFilters: filters.searchPhraseIgnoreOtherFilters
         })
     }
 
@@ -130,7 +138,8 @@ const Dashboard: React.FC = () => {
         setFechaTermino(newFechaTermino);
 
         if (resetAll) {
-            getData({ tipoDoc: parsedTipoDoc, fechaInicio: newFechaInicio, fechaTermino: newFechaTermino, categoria: 0, searchPhrase: "" });
+            getData({ tipoDoc: parsedTipoDoc, fechaInicio: newFechaInicio, fechaTermino: newFechaTermino, categoria: 0, searchPhrase: "", searchPhraseIgnoreOtherFilters: true });
+            setSearchPhraseIgnoreOtherFilters(true)
             setSelectedCategoria(0)
             setSearchPhrase("")
         } else {
@@ -165,7 +174,7 @@ const Dashboard: React.FC = () => {
                         <ListRestart />
                     </Button>
                     <DocsFilters onFiltersChange={handleFiltersChange} fechaInicio={fechaInicio} fechaTermino={fechaTermino}
-                        categoria={selectedCategoria} searchPhrase={searchPhrase} />
+                        categoria={selectedCategoria} searchPhrase={searchPhrase} searchPhraseIgnoreOtherFilters={searchPhraseIgnoreOtherFilters} />
                     <Select value={selectedTipoDoc.toString()} onValueChange={(e) => handleTipoDocChange(e, false)}>
                         <SelectTrigger>
                             <SelectValue />
@@ -195,6 +204,10 @@ const Dashboard: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            {docs.length === 0 && !apiCalling && (
+                                <TableRow className='text-center text-muted-foreground'>
+                                    <TableCell colSpan={3}>Sin Datos</TableCell>
+                                </TableRow>)}
                             {docs.map((doc, index) => (
                                 <TableRow key={index} onClick={() => handleRowClick(doc.id)}>
                                     <TableCell>{doc.fecha}</TableCell>
@@ -207,14 +220,14 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
             <div className="grid gap-2">
-                <div className="grid gap-2 items-center" style={{gridTemplateColumns: "3fr 2fr 4fr"}} >
+                <div className="grid gap-2 items-center" style={{ gridTemplateColumns: "3fr 2fr 4fr" }} >
                     <UsagePercentage ref={percentageRef} />
-                    <YearlySum ref={yearlySumRef}/>
+                    <YearlySum ref={yearlySumRef} />
                     <CategoriasRadial ref={radarChartRef} />
                 </div>
                 <div className="grid gap-2" style={{ gridTemplateColumns: '5fr 3fr' }}>
                     <MonthlyGraphChart ref={monthlyChartRef} />
-                    <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef}/>
+                    <GraficoCategorias onBarClick={(e) => onBarClick(e)} ref={barChartRef} />
                 </div>
             </div>
         </div>
