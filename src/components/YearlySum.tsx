@@ -85,14 +85,15 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
         <CardDescription>Utilidad 13 meses</CardDescription>
         <div className='grid grid-cols-2 justify-between items-center' style={{ gridTemplateColumns: '1fr 3fr' }}>
           <div>
-            {getIcon()}
-          </div>
-          <div className='text-right'>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
               {numeral(utilidadAnual).format("0,0.0")}%
             </CardTitle>
             <span className='text-sm'>${numeral(montoUtilidad).format("0,0")}</span>
           </div>
+          <div className='justify-self-end'>
+            {getIcon()}
+          </div>
+
         </div>
       </CardHeader>
       <CardContent className='grid gap-2'>
