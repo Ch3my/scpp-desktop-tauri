@@ -1,4 +1,4 @@
-import { Home, Settings, SquarePlay } from "lucide-react"
+import { Home, Settings, SquarePlay, Wheat } from "lucide-react"
 import { Link } from "react-router"
 
 import {
@@ -23,6 +23,11 @@ const items = [
     title: "Assets",
     url: "/assets",
     icon: SquarePlay,
+  },
+  {
+    title: "Food",
+    url: "/food",
+    icon: Wheat,
   },
   {
     title: "Settings",

@@ -15,9 +15,10 @@ import { useEffect } from "react";
 interface DatePickerProps {
     value?: DateTime | undefined;
     onChange: (date: DateTime | undefined) => void;
+    disabled?: boolean;
 }
 
-export const DatePicker: React.FC<DatePickerProps & { className?: string }> = ({ value, onChange, className }) => {
+export const DatePicker: React.FC<DatePickerProps & { className?: string }> = ({ value, onChange, className, disabled  }) => {
     const [selectedDate, setSelectedDate] = React.useState<DateTime | undefined>(value);
 
     useEffect(() => {
@@ -37,6 +38,7 @@ export const DatePicker: React.FC<DatePickerProps & { className?: string }> = ({
                 <span>
                     <Button
                         variant={"outline"}
+                        disabled={disabled}
                         className={cn(
                             "w-full justify-start text-left font-normal",
                             !selectedDate && "text-muted-foreground",

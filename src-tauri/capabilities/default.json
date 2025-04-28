@@ -10,7 +10,7 @@
     "opener:default",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*.lezora.cl" }]
+      "allow": [{ "url": "https://*.lezora.cl" }, { "url": "http://localhost:3000" }]
     }
   ]
 }

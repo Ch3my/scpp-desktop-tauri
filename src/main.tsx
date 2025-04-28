@@ -7,6 +7,7 @@ import { SidebarProvider, } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import Login from "./screens/Login";
 import Config from "./screens/Config";
+import Food from "./screens/Food";
 import { useAppState } from "./AppState";
 import Dashboard from "./screens/Dashboard";
 import { Htas } from "./screens/Htas";
@@ -35,6 +36,7 @@ const RootComponent = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/htas" element={<Htas />} />
           <Route path="/assets" element={<Assets />} />
+          <Route path="/food" element={<Food />} />
         </Routes>
       </BrowserRouter>
     </SidebarProvider>
