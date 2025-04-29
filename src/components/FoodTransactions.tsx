@@ -17,7 +17,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Skull } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 
@@ -79,8 +79,10 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                 transactionType: item.transaction_type,
                 note: item.note,
                 code: item.code,
-                bestBefore: DateTime.fromISO(item.best_before),
-                food: food
+                bestBefore: item.best_before ? DateTime.fromISO(item.best_before) : null,
+                food: food,
+                remainingQuantity: item.remaining_quantity,
+                fkTransaction: item.fk_transaction
             }
             return transaction
         });
@@ -107,6 +109,19 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
         getData()
     }
 
+    const calculateIcon = (bestBefore: DateTime | null) => {
+        if(!bestBefore) {
+            return
+        }
+        const today = DateTime.now()
+        const diff = bestBefore.diff(today, ['days']).days
+        if(diff < 31) {
+            return <Skull size={24} />
+        } else {
+            return 
+        }
+    }
+
     useEffect(() => {
         getData()
     }, []);
@@ -117,11 +132,15 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                 <TableHeader>
                     <TableRow>
                         <TableHead>Fecha</TableHead>
+                        <TableHead>Vencimiento</TableHead>
+                        <TableHead></TableHead>
                         <TableHead>Nombre</TableHead>
                         <TableHead></TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead className="text-right">Cantidad</TableHead>
-                        <TableHead>Vencimiento</TableHead>
+                        <TableHead className="text-right">Remanente</TableHead>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Ref ID</TableHead>
                         <TableHead></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -134,11 +153,15 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                         transactions.map((o) => (
                             <TableRow key={o.id}>
                                 <TableCell>{o.occurredAt.toFormat("dd-MM-yyyy")}</TableCell>
+                                <TableCell>{o.bestBefore?.toFormat("dd-MM-yyyy")}</TableCell>
+                                <TableCell>{calculateIcon(o.bestBefore)}</TableCell>
                                 <TableCell>{o.food?.name}</TableCell>
                                 <TableCell>{o.food?.unit}</TableCell>
                                 <TableCell>{accionMapping[o.transactionType]}</TableCell>
                                 <TableCell className="text-right">{o.changeQty}</TableCell>
-                                <TableCell>{o.bestBefore.toFormat("dd-MM-yyyy")}</TableCell>
+                                <TableCell className="text-right">{o.remainingQuantity}</TableCell>
+                                <TableCell className="text-right">{o.id}</TableCell>
+                                <TableCell className="text-right">{o.fkTransaction}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger>

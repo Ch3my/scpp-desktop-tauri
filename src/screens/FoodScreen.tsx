@@ -97,7 +97,7 @@ const FoodScreen: React.FC = () => {
     }, []);
 
     return (
-        <div className="grid gap-4 p-2 w-screen h-screen" style={{ gridTemplateColumns: "auto 1fr" }}>
+        <div className="grid gap-4 p-2 w-screen h-screen" style={{ gridTemplateColumns: "1fr 2fr" }}>
             <div className='flex flex-col gap-2'>
                 <ScreenTitle title='Food Storage' />
                 <div className='flex gap-2'>
@@ -109,7 +109,7 @@ const FoodScreen: React.FC = () => {
                             <TableHead>Nombre</TableHead>
                             <TableHead className="text-right">Cantidad</TableHead>
                             <TableHead></TableHead>
-                            <TableHead>Ultima Transaccion</TableHead>
+                            <TableHead>Actividad</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

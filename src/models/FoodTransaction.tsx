@@ -9,6 +9,8 @@ export type FoodTransaction = {
     occurredAt: DateTime; 
     note: string;
     code: string;
-    bestBefore: DateTime; 
+    bestBefore: DateTime | null; 
     food: Food | undefined;
+    remainingQuantity: number | null;
+    fkTransaction: number | null; 
   }
