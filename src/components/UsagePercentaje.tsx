@@ -27,6 +27,10 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
 
         const gasto = response.data.find((o: any) => o.fk_tipoDoc == 1)
         const ingresos = response.data.find((o: any) => o.fk_tipoDoc == 3)
+        if(!gasto || !ingresos) {
+            setIsLoading(false)
+            return
+        }
         setThisMonthIngresos(ingresos.sumMonto)
         setThisMonthGastos(gasto.sumMonto)
         setRemanente(ingresos.sumMonto - gasto.sumMonto)

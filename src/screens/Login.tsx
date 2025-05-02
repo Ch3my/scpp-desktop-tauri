@@ -20,7 +20,7 @@ export default function Login() {
     const [user, setUser] = useState<string>("");
     const [pass, setPass] = useState<string>("");
     let navigate = useNavigate();
-    const { apiPrefix, setSessionId, setLoggedIn } = useAppState()
+    const { apiPrefix, setSessionId, setLoggedIn, fetchCategorias, fetchTipoDocs } = useAppState()
 
     const login = async () => {
         if (!user || !pass) {
@@ -43,6 +43,9 @@ export default function Login() {
         localStorage.setItem("isLoggedIn", "true")
         setLoggedIn(true)
         setSessionId(response.sessionHash)
+
+        await Promise.all([fetchCategorias(), fetchTipoDocs()]);
+
         navigate("/dashboard")
     }
 

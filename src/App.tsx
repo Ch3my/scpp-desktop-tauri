@@ -32,11 +32,11 @@ export default function App() {
 
       setSessionId(sessionId)
       setLoggedIn(true)
+
+      await Promise.all([fetchCategorias(), fetchTipoDocs()]);
       navigate("/dashboard")
     }
 
-    fetchCategorias()
-    fetchTipoDocs()
     checkLoginStatus();
   }, []);
 
