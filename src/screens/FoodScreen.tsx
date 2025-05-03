@@ -8,14 +8,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-// import {
-//     DropdownMenu,
-//     DropdownMenuContent,
-//     DropdownMenuItem,
-//     DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu"
-// import { MoreHorizontal } from 'lucide-react';
-// import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import {
     Breadcrumb,
@@ -107,9 +107,10 @@ const FoodScreen: React.FC = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Nombre</TableHead>
-                            <TableHead className="text-right">Cantidad</TableHead>
+                            <TableHead className="text-right">Cant</TableHead>
                             <TableHead></TableHead>
-                            <TableHead>Actividad</TableHead>
+                            <TableHead className='min-w-[100px]'>Actividad</TableHead>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -124,7 +125,7 @@ const FoodScreen: React.FC = () => {
                                     <TableCell className="text-right">{food.quantity}</TableCell>
                                     <TableCell className='w-[40px]'>{food.unit}</TableCell>
                                     <TableCell>{food.lastTransactionAt?.toFormat("dd-MM-yyyy")}</TableCell>
-                                    {/* <TableCell className="text-right">
+                                    <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger>
                                                 <Button variant="ghost" className="h-6 w-8 p-0">
@@ -141,7 +142,7 @@ const FoodScreen: React.FC = () => {
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                    </TableCell> */}
+                                    </TableCell>
                                 </TableRow>
                             ))
                         )}

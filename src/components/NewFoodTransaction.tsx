@@ -23,8 +23,8 @@ import { Label } from "@/components/ui/label"
 import { CirclePlus, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { DateTime } from "luxon";
-import { DatePicker } from "./DatePicker";
 import { toast } from "sonner";
+import { DatePickerInput } from "./DatePickerInput";
 
 interface Props {
     onOpenChange?: (isOpen: boolean) => void;
@@ -90,7 +90,7 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
             body: JSON.stringify(payload),
         }).then(response => response.json());
 
-        if(reponse.hasErrors) {
+        if (reponse.hasErrors) {
             toast("Error al guardar la transacción " + reponse.errorDescription[0])
             setLoading(false);
             return
@@ -120,11 +120,16 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
         if (controlledIsOpen === undefined) {
             setUncontrolledIsOpen(open);
         }
+        if (!isOpen) {
+            clearInputs()
+        }
     };
 
     useEffect(() => {
-        getData()
-    }, []);
+        if (isOpen) {
+            getData()
+        }
+    }, [isOpen]);
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDialogChange}>
@@ -146,7 +151,7 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
                         <SelectTrigger>
                             <SelectValue placeholder="Selecciona un Item" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-80">
                             <SelectGroup>
                                 {foods.map((food) => (
                                     <SelectItem key={food.id} value={food.id}>
@@ -179,21 +184,24 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
                     <Label htmlFor="codigo">
                         Código
                     </Label>
-                    <Input id="codigo" maxLength={3} autoComplete="off" 
+                    <Input id="codigo" maxLength={3} autoComplete="off"
                         disabled={accion !== "restock"}
                         value={codigo} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCodigo(e.target.value.toUpperCase())} />
                     <Label htmlFor="notas">
                         Vencimiento
                     </Label>
-                    <DatePicker
+                    {/* <DatePicker
                         value={bestBefore}
                         disabled={accion !== "restock"}
                         onChange={(e) => e && setBestBefore(e)}
-                    />
+                    /> */}
+                    <DatePickerInput value={bestBefore}
+                        disabled={accion !== "restock"}
+                        onChange={(e) => e && setBestBefore(e)} />
                     <Label htmlFor="notas">
                         Notas
                     </Label>
-                    <Input id="notas" value={notas} autoComplete="off" 
+                    <Input id="notas" value={notas} autoComplete="off"
                         disabled={accion !== "restock"}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotas(e.target.value)} />
                 </div>

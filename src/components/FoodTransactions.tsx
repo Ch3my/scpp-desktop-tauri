@@ -61,7 +61,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         let apiData: any[] = await response.json(); // Get the raw data from the API
-        console.log(apiData)
+        //console.log(apiData)
 
         const transactionsData: FoodTransaction[] = apiData.map((item: any) => {
             let food = {
