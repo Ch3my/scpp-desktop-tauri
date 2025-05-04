@@ -57,7 +57,7 @@ const FoodScreen: React.FC = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            let apiData: any[] = await response.json(); 
+            let apiData: any[] = await response.json();
 
             // --- TRANSFORMATION STEP ---
             // Map the raw API data to match the Food type structure
@@ -66,7 +66,7 @@ const FoodScreen: React.FC = () => {
                 name: item.name,
                 unit: item.unit,
                 quantity: item.quantity,
-                lastTransactionAt: item.last_transaction_at ? DateTime.fromISO(item.last_transaction_at) : null 
+                lastTransactionAt: item.last_transaction_at ? DateTime.fromISO(item.last_transaction_at) : null
             }));
             // --- END TRANSFORMATION ---
 
@@ -97,11 +97,11 @@ const FoodScreen: React.FC = () => {
     }, []);
 
     return (
-        <div className="grid gap-4 p-2 w-screen h-screen" style={{ gridTemplateColumns: "1fr 2fr" }}>
+        <div className="grid gap-4 p-2 w-screen h-screen overflow-hidden" style={{ gridTemplateColumns: "1fr 2fr" }}>
             <div className='flex flex-col gap-2'>
                 <ScreenTitle title='Food Storage' />
                 <div className='flex gap-2'>
-                    <NewFoodItem onOpenChange={newFoodItemDialogEvent}/>
+                    <NewFoodItem onOpenChange={newFoodItemDialogEvent} />
                 </div>
                 <Table>
                     <TableHeader>
@@ -149,7 +149,7 @@ const FoodScreen: React.FC = () => {
                     </TableBody>
                 </Table>
             </div>
-            <div className='flex flex-col gap-2'>
+            <div className='flex flex-col gap-2 overflow-auto'>
                 <div className="flex shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10">
                     <div className="flex items-center gap-2">
                         <Breadcrumb>
@@ -166,7 +166,9 @@ const FoodScreen: React.FC = () => {
                 <div className='flex gap-2'>
                     <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
                 </div>
-                <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => {getData()}}/>
+                <div className='overflow-y-auto'>
+                    <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => { getData() }} />
+                </div>
             </div>
         </div>
     );

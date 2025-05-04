@@ -31,7 +31,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
     const { apiPrefix, sessionId } = useAppState()
     const [transactions, setTransactions] = React.useState<FoodTransaction[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
-    
+
     const accionMapping: { [key: string]: string } = {
         "consumption": "Consumo",
         "adjustment": "Ajuste",
@@ -110,15 +110,15 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
     }
 
     const calculateIcon = (bestBefore: DateTime | null) => {
-        if(!bestBefore) {
+        if (!bestBefore) {
             return
         }
         const today = DateTime.now()
         const diff = bestBefore.diff(today, ['days']).days
-        if(diff < 31) {
+        if (diff < 31) {
             return <Skull size={24} />
         } else {
-            return 
+            return
         }
     }
 
@@ -131,16 +131,17 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Vencimiento</TableHead>
+                        <TableHead className='min-w-[100px]'>Fecha</TableHead>
+                        <TableHead className='min-w-[100px]'>Vencimiento</TableHead>
                         <TableHead></TableHead>
                         <TableHead>Nombre</TableHead>
+                        <TableHead>Cod</TableHead>
                         <TableHead></TableHead>
                         <TableHead>Tipo</TableHead>
-                        <TableHead className="text-right">Cantidad</TableHead>
-                        <TableHead className="text-right">Remanente</TableHead>
+                        <TableHead className="text-right">Cant</TableHead>
+                        <TableHead className="text-right">Remnte</TableHead>
                         <TableHead>ID</TableHead>
-                        <TableHead>Ref ID</TableHead>
+                        <TableHead>R-ID</TableHead>
                         <TableHead></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -156,6 +157,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                                 <TableCell>{o.bestBefore?.toFormat("dd-MM-yyyy")}</TableCell>
                                 <TableCell>{calculateIcon(o.bestBefore)}</TableCell>
                                 <TableCell>{o.food?.name}</TableCell>
+                                <TableCell>{o.code}</TableCell>
                                 <TableCell>{o.food?.unit}</TableCell>
                                 <TableCell>{accionMapping[o.transactionType]}</TableCell>
                                 <TableCell className="text-right">{o.changeQty}</TableCell>
