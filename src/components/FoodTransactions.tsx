@@ -115,7 +115,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
         }
         const today = DateTime.now()
         const diff = bestBefore.diff(today, ['days']).days
-        if (diff < 31) {
+        if (diff < 60) {
             return <Skull size={24} />
         } else {
             return

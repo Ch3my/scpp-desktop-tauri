@@ -14,7 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from 'lucide-react';
+import { CirclePlus, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import {
@@ -31,13 +31,16 @@ import { DateTime } from 'luxon';
 
 import NewFoodTransaction from '@/components/NewFoodTransaction';
 import FoodTransactions, { FoodTransactionsRef } from '@/components/FoodTransactions';
-import NewFoodItem from '@/components/NewFoodItem';
+import FoodItemRecord from '@/components/FoodItemRecord';
+import { toast } from 'sonner';
 
 const FoodScreen: React.FC = () => {
     const { apiPrefix, sessionId } = useAppState()
     const [foods, setFoods] = React.useState<Food[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [openFoodItemDialog, setOpenFoodItemDialog] = React.useState<boolean>(false);
     const foodTransactionRef = useRef<FoodTransactionsRef>(null);
+    const [selectedFoodItemId, setSelectedFoodItemId] = React.useState<number>(0);
 
     const getData = async () => {
         setLoading(true);
@@ -87,9 +90,39 @@ const FoodScreen: React.FC = () => {
         }
     }
     const newFoodItemDialogEvent = (isOpen: boolean) => {
+        setOpenFoodItemDialog(isOpen)
         if (!isOpen) {
             getData()
+            setTimeout(() => {
+                setSelectedFoodItemId(0) // Reset the selected food item ID
+            }, 100); // Delay to allow the dialog to close before reset that change text inside the dialog
         }
+    }
+
+    const deleteFoodItem = async (id: number) => {
+        setLoading(true)
+        let response = await fetch(`${apiPrefix}/food/item`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionHash: sessionId, id: id }),
+
+        }).then(response => response.json())
+
+        if (response.hasErrors) {
+            toast.error('Error al eliminar el item: ' + response.errorDescription[0]);
+            setLoading(false)
+            return
+        }
+        toast('Item eliminado');
+        // NOTA. setLoading(false) is called in the getData function
+        getData()
+    }
+
+    const editFoodItem = async (id: number) => {
+        setSelectedFoodItemId(id)
+        setOpenFoodItemDialog(true)
     }
 
     useEffect(() => {
@@ -101,7 +134,9 @@ const FoodScreen: React.FC = () => {
             <div className='flex flex-col gap-2'>
                 <ScreenTitle title='Food Storage' />
                 <div className='flex gap-2'>
-                    <NewFoodItem onOpenChange={newFoodItemDialogEvent} />
+                    <Button variant="outline" onClick={() => {
+                        setOpenFoodItemDialog(!openFoodItemDialog)
+                    }}><CirclePlus /></Button>
                 </div>
                 <Table>
                     <TableHeader>
@@ -126,7 +161,7 @@ const FoodScreen: React.FC = () => {
                                     <TableCell className='w-[40px]'>{food.unit}</TableCell>
                                     <TableCell>{food.lastTransactionAt?.toFormat("dd-MM-yyyy")}</TableCell>
                                     <TableCell className="text-right">
-                                        <DropdownMenu>
+                                        <DropdownMenu modal={false}>
                                             <DropdownMenuTrigger>
                                                 <Button variant="ghost" className="h-6 w-8 p-0">
                                                     <span className="sr-only">Open menu</span>
@@ -136,6 +171,14 @@ const FoodScreen: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem
                                                     onClick={() => {
+                                                        editFoodItem(food.id)
+                                                    }}
+                                                >
+                                                    Editar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        deleteFoodItem(food.id)
                                                     }}
                                                 >
                                                     Eliminar
@@ -170,6 +213,7 @@ const FoodScreen: React.FC = () => {
                     <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => { getData() }} />
                 </div>
             </div>
+            <FoodItemRecord onOpenChange={newFoodItemDialogEvent} id={selectedFoodItemId} isOpen={openFoodItemDialog} hideButton={true} />
         </div>
     );
 };
