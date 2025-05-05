@@ -224,7 +224,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="max-h-60">
+                            <SelectContent className="max-h-80">
                                 <SelectGroup>
                                     {categorias.map((categoria) => (
                                         <SelectItem key={categoria.id} value={String(categoria.id)}>
