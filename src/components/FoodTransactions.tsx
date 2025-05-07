@@ -49,6 +49,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
         let params = new URLSearchParams();
         params.set("sessionHash", sessionId);
         params.set("page", String(1));
+        params.set("itemId", String(foodItemIdFilter));
 
         let response = await fetch(`${apiPrefix}/food/transaction?${params.toString()}`, {
             method: 'GET',
@@ -62,7 +63,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         let apiData: any[] = await response.json(); // Get the raw data from the API
-        //console.log(apiData)
+        // console.log(apiData)
 
         const transactionsData: FoodTransaction[] = apiData.map((item: any) => {
             let food = {
@@ -87,13 +88,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
             }
             return transaction
         });
-        if(foodItemIdFilter > 0) {
-            // Filter transactions by foodItemIdFilter
-            const filteredTransactions = transactionsData.filter(transaction => transaction.itemId === foodItemIdFilter);
-            setTransactions(filteredTransactions);
-        } else {
-            setTransactions(transactionsData);
-        }
+        setTransactions(transactionsData);
         setLoading(false);
     }
 
