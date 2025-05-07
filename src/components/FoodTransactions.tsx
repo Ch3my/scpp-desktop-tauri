@@ -26,8 +26,9 @@ export interface FoodTransactionsRef {
 }
 export interface FoodTransactionsProps {
     onTransactionDeleted?: (deletedTransactionId: number) => void;
+    foodItemIdFilter: number
 }
-const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted }, ref) => {
+const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted, foodItemIdFilter }, ref) => {
     const { apiPrefix, sessionId } = useAppState()
     const [transactions, setTransactions] = React.useState<FoodTransaction[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -86,7 +87,13 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
             }
             return transaction
         });
-        setTransactions(transactionsData);
+        if(foodItemIdFilter > 0) {
+            // Filter transactions by foodItemIdFilter
+            const filteredTransactions = transactionsData.filter(transaction => transaction.itemId === foodItemIdFilter);
+            setTransactions(filteredTransactions);
+        } else {
+            setTransactions(transactionsData);
+        }
         setLoading(false);
     }
 
@@ -125,6 +132,10 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
     useEffect(() => {
         getData()
     }, []);
+
+    useEffect(() => {
+        getData()
+    }, [foodItemIdFilter]);
 
     return (
         <div>

@@ -23,6 +23,13 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 import { useAppState } from '@/AppState';
 import { Food } from '@/models/Food';
@@ -41,6 +48,7 @@ const FoodScreen: React.FC = () => {
     const [openFoodItemDialog, setOpenFoodItemDialog] = React.useState<boolean>(false);
     const foodTransactionRef = useRef<FoodTransactionsRef>(null);
     const [selectedFoodItemId, setSelectedFoodItemId] = React.useState<number>(0);
+    const [foodItemIdFilter, setFoodItemIdFilter] = React.useState<number>(0);
 
     const getData = async () => {
         setLoading(true);
@@ -208,9 +216,24 @@ const FoodScreen: React.FC = () => {
                 </div>
                 <div className='flex gap-2'>
                     <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
+                    <Select onValueChange={(o) => setFoodItemIdFilter(parseInt(o))}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filtro Item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem key={0} value={"0"}>
+                                (Todos)
+                            </SelectItem>
+                            {foods.map((food) => (
+                                <SelectItem key={food.id} value={food.id.toString()}>
+                                    {food.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className='overflow-y-auto'>
-                    <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => { getData() }} />
+                    <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => { getData() }} foodItemIdFilter={foodItemIdFilter} />
                 </div>
             </div>
             <FoodItemRecord onOpenChange={newFoodItemDialogEvent} id={selectedFoodItemId} isOpen={openFoodItemDialog} hideButton={true} />
