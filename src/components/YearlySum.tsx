@@ -5,6 +5,7 @@ import numeral from 'numeral';
 import { Skeleton } from './ui/skeleton';
 import { ArrowBigDownDash, ArrowBigUpDash, Minus } from 'lucide-react';
 import { CardHeader, CardDescription, CardTitle, Card, CardContent } from './ui/card';
+import { DateTime } from 'luxon';
 
 function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
   // const [percentage, setPercentage] = useState<number>(0);
@@ -12,6 +13,7 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
   const [ingresoSum, setIngresoSum] = useState<number>(0);
   const [utilidadAnual, setUtilidadAnual] = useState<number>(0);
   const [montoUtilidad, setMontoUtilidad] = useState<number>(0);
+  const [range, setRange] = useState<{ start: DateTime; end: DateTime }>({ start: DateTime.now(), end: DateTime.now() })
   const { apiPrefix, sessionId } = useAppState()
   const [isLoading, setIsLoading] = useState(true)
 
@@ -19,7 +21,7 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
     setIsLoading(true)
     let params = new URLSearchParams();
     params.set("sessionHash", sessionId);
-    params.set("nMonths", "13");
+    params.set("nMonths", "12");
     const response = await fetch(`${apiPrefix}/yearly-sum?${params.toString()}`, {
       method: "GET",
       headers: {
@@ -33,6 +35,10 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
     setIngresoSum(ingreso.sumMonto)
     setUtilidadAnual(100 - response.porcentajeUsado)
     setMontoUtilidad(ingreso.sumMonto - gasto.sumMonto)
+    setRange({
+      start: DateTime.fromFormat(response.range.start, "yyyy-MM-dd"),
+      end: DateTime.fromFormat(response.range.end, "yyyy-MM-dd"),
+    });
     setIsLoading(false)
   };
 
@@ -82,7 +88,10 @@ function YearlySum(_props: unknown, ref: React.Ref<unknown>) {
   return (
     <Card className='h-full'>
       <CardHeader>
-        <CardDescription>Utilidad 13 meses</CardDescription>
+        <CardDescription className='grid'>
+          <span>Utilidad</span>
+          <span>{range.start.toLocaleString({ month: 'short', year: '2-digit' })} - {range.end.toLocaleString({ month: 'short', year: '2-digit' })}</span>
+        </CardDescription>
         <div className='grid grid-cols-2 justify-between items-center' style={{ gridTemplateColumns: '1fr 3fr' }}>
           <div>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">

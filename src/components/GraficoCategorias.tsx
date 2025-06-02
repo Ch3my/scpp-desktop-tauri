@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "./ui/skeleton";
 import numeral from "numeral";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { DateTime } from "luxon";
 
 const chartConfig = {
     desktop: {
@@ -34,6 +35,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
         const { onBarClick } = props;
         const [chartData, setChartData] = useState([]);
         const [isLoading, setIsLoading] = useState(true)
+        const [range, setRange] = useState<{ start: DateTime; end: DateTime }>({ start: DateTime.now(), end: DateTime.now() })
         const [hover, setHover] = useState<number | null>(null)
         const { apiPrefix, sessionId } = useAppState();
 
@@ -42,7 +44,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
                 // setIsLoading(true)
                 const params = new URLSearchParams();
                 params.set("sessionHash", sessionId);
-                params.set("nMonths", "13");
+                params.set("nMonths", "12");
 
                 const response = await fetch(
                     `${apiPrefix}/expenses-by-category?${params.toString()}`,
@@ -65,6 +67,10 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
                 }));
 
                 setChartData(newChartData);
+                setRange({
+                    start: DateTime.fromFormat(result.range.start, "yyyy-MM-dd" ),
+                    end: DateTime.fromFormat(result.range.end, "yyyy-MM-dd" ),
+                });
             } catch (error) {
                 console.error("Error fetching chart data:", error);
             }
@@ -107,7 +113,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
             <Card>
                 <CardHeader>
                     <CardTitle>Gastos por Categorias</CardTitle>
-                    <CardDescription>13 meses</CardDescription>
+                    <CardDescription>{range.start.toLocaleString({ month: 'long', year: 'numeric' })} - {range.end.toLocaleString({ month: 'long', year: 'numeric' })}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={chartConfig} className="aspect-square">
