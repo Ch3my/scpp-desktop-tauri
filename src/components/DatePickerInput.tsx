@@ -101,6 +101,7 @@ export const DatePickerInput: React.FC<
             <PopoverContent align="end" className="w-auto p-0">
                 <Calendar
                     mode="single"
+                    captionLayout="dropdown"
                     selected={selectedDate?.toJSDate()}
                     onSelect={handleSelect}
                 />
