@@ -40,12 +40,15 @@ import NewFoodTransaction from '@/components/NewFoodTransaction';
 import FoodTransactions, { FoodTransactionsRef } from '@/components/FoodTransactions';
 import FoodItemRecord from '@/components/FoodItemRecord';
 import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 const FoodScreen: React.FC = () => {
     const { apiPrefix, sessionId } = useAppState()
     const [foods, setFoods] = React.useState<Food[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [openFoodItemDialog, setOpenFoodItemDialog] = React.useState<boolean>(false);
+    const [orderByBestBy, setOrderByBestBy] = React.useState<boolean>(false);
     const foodTransactionRef = useRef<FoodTransactionsRef>(null);
     const [selectedFoodItemId, setSelectedFoodItemId] = React.useState<number>(0);
     const [foodItemIdFilter, setFoodItemIdFilter] = React.useState<number>(0);
@@ -214,7 +217,7 @@ const FoodScreen: React.FC = () => {
                         </Breadcrumb>
                     </div>
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex gap-2 items-center'>
                     <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
                     <Select onValueChange={(o) => setFoodItemIdFilter(parseInt(o))}>
                         <SelectTrigger className="w-[180px]">
@@ -231,9 +234,16 @@ const FoodScreen: React.FC = () => {
                             ))}
                         </SelectContent>
                     </Select>
+                    <div className='flex gap-2 items-baseline' >
+                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={o=> setOrderByBestBy(o)} />
+                        <Label htmlFor="best-by-order">Vencen pronto</Label>
+                    </div>
                 </div>
                 <div className='overflow-y-auto'>
-                    <FoodTransactions ref={foodTransactionRef} onTransactionDeleted={() => { getData() }} foodItemIdFilter={foodItemIdFilter} />
+                    <FoodTransactions ref={foodTransactionRef} 
+                    onTransactionDeleted={() => { getData() }} 
+                    foodItemIdFilter={foodItemIdFilter} 
+                    orderByBestBy={orderByBestBy}/>
                 </div>
             </div>
             <FoodItemRecord onOpenChange={newFoodItemDialogEvent} id={selectedFoodItemId} isOpen={openFoodItemDialog} hideButton={true} />

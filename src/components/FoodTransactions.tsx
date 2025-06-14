@@ -26,9 +26,10 @@ export interface FoodTransactionsRef {
 }
 export interface FoodTransactionsProps {
     onTransactionDeleted?: (deletedTransactionId: number) => void;
-    foodItemIdFilter: number
+    foodItemIdFilter: number;
+    orderByBestBy?: boolean;
 }
-const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted, foodItemIdFilter }, ref) => {
+const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted, foodItemIdFilter, orderByBestBy }, ref) => {
     const { apiPrefix, sessionId } = useAppState()
     const [transactions, setTransactions] = React.useState<FoodTransaction[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -77,17 +78,29 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                 id: item.id,
                 itemId: item.item_id,
                 changeQty: item.change_qty,
-                occurredAt: DateTime.fromISO(item.occurred_at),
+                occurredAt: DateTime.fromISO(item.occurred_at, { zone: 'utc' }),
                 transactionType: item.transaction_type,
                 note: item.note,
                 code: item.code,
-                bestBefore: item.best_before ? DateTime.fromISO(item.best_before) : null,
+                bestBefore: item.best_before ? DateTime.fromISO(item.best_before, { zone: 'utc' }) : null,
                 food: food,
                 remainingQuantity: item.remaining_quantity,
                 fkTransaction: item.fk_transaction
             }
             return transaction
         });
+        if (orderByBestBy) {
+            transactionsData.sort((a, b) => {
+                // Handle null bestBefore values: nulls still go to the end for ascending sort
+                if (!a.bestBefore && !b.bestBefore) return 0;
+                if (!a.bestBefore) return 1; // b has a date, a doesn't, so a comes after b (at the end)
+                if (!b.bestBefore) return -1; // a has a date, b doesn't, so b comes after a (at the end)
+
+                // Sort in ascending order (oldest bestBefore first)
+                return a.bestBefore.toMillis() - b.bestBefore.toMillis();
+            });
+        }
+
         setTransactions(transactionsData);
         setLoading(false);
     }
@@ -130,7 +143,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
 
     useEffect(() => {
         getData()
-    }, [foodItemIdFilter]);
+    }, [foodItemIdFilter, orderByBestBy]);
 
     return (
         <div>
@@ -147,7 +160,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                         <TableHead className="text-right">Cant</TableHead>
                         <TableHead className="text-right">Remnte</TableHead>
                         <TableHead>ID</TableHead>
-                        <TableHead>R-ID</TableHead>
+                        {/*<TableHead>R-ID</TableHead> */}
                         <TableHead></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -169,7 +182,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                                 <TableCell className="text-right">{o.changeQty}</TableCell>
                                 <TableCell className="text-right">{o.remainingQuantity}</TableCell>
                                 <TableCell className="text-right">{o.id}</TableCell>
-                                <TableCell className="text-right">{o.fkTransaction}</TableCell>
+                                {/*<TableCell className="text-right">{o.fkTransaction}</TableCell> */}
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger>
@@ -185,6 +198,10 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                                                 }}
                                             >
                                                 Eliminar
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                            >
+                                                R-ID: {o.fkTransaction}
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
