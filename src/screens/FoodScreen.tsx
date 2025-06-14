@@ -217,33 +217,35 @@ const FoodScreen: React.FC = () => {
                         </Breadcrumb>
                     </div>
                 </div>
-                <div className='flex gap-2 items-center'>
-                    <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
-                    <Select onValueChange={(o) => setFoodItemIdFilter(parseInt(o))}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Filtro Item" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem key={0} value={"0"}>
-                                (Todos)
-                            </SelectItem>
-                            {foods.map((food) => (
-                                <SelectItem key={food.id} value={food.id.toString()}>
-                                    {food.name}
+                <div className='flex items-center justify-between'>
+                    <div className='flex gap-2'>
+                        <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
+                        <Select onValueChange={(o) => setFoodItemIdFilter(parseInt(o))}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filtro Item" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem key={0} value={"0"}>
+                                    (Todos)
                                 </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <div className='flex gap-2 items-baseline' >
-                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={o=> setOrderByBestBy(o)} />
-                        <Label htmlFor="best-by-order">Vencen pronto</Label>
+                                {foods.map((food) => (
+                                    <SelectItem key={food.id} value={food.id.toString()}>
+                                        {food.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className='flex gap-2 mr-4' >
+                        <Label htmlFor="best-by-order" className='font-normal'>Vencen pronto</Label>
+                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={o => setOrderByBestBy(o)} />
                     </div>
                 </div>
                 <div className='overflow-y-auto'>
-                    <FoodTransactions ref={foodTransactionRef} 
-                    onTransactionDeleted={() => { getData() }} 
-                    foodItemIdFilter={foodItemIdFilter} 
-                    orderByBestBy={orderByBestBy}/>
+                    <FoodTransactions ref={foodTransactionRef}
+                        onTransactionDeleted={() => { getData() }}
+                        foodItemIdFilter={foodItemIdFilter}
+                        orderByBestBy={orderByBestBy} />
                 </div>
             </div>
             <FoodItemRecord onOpenChange={newFoodItemDialogEvent} id={selectedFoodItemId} isOpen={openFoodItemDialog} hideButton={true} />
