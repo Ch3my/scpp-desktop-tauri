@@ -117,15 +117,15 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                 <div className="grid grid-cols-2 justify-between">
                     <div>
                         <span className="text-muted-foreground">
-                            Ingresos
-                        </span>
-                        <p>{numeral(thisMonthIngresos).format("$0,0")}</p>
-                    </div>
-                    <div>
-                        <span className="text-muted-foreground">
                             Gastos
                         </span>
                         <p>{numeral(thisMonthGastos).format("$0,0")}</p>
+                    </div>
+                    <div>
+                        <span className="text-muted-foreground">
+                            Ingresos
+                        </span>
+                        <p>{numeral(thisMonthIngresos).format("$0,0")}</p>
                     </div>
                 </div>
             </CardHeader>
