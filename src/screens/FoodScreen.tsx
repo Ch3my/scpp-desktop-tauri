@@ -238,7 +238,7 @@ const FoodScreen: React.FC = () => {
                     </div>
                     <div className='flex gap-2 mr-4' >
                         <Label htmlFor="best-by-order" className='font-normal'>Vencen pronto</Label>
-                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={o => setOrderByBestBy(o)} />
+                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={(o: any) => setOrderByBestBy(o)} />
                     </div>
                 </div>
                 <div className='overflow-y-auto'>
