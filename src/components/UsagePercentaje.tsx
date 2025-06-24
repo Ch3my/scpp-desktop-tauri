@@ -5,6 +5,23 @@ import numeral from 'numeral';
 import { Skeleton } from './ui/skeleton';
 import { Card, CardContent, CardHeader } from './ui/card';
 
+const OKLCH_GREEN_600 = { l: 62.7, c: 0.194, h: 149.214 };
+const OKLCH_RED_600 = { l: 57.7, c: 0.245, h: 27.325 };
+
+const getPercentageColor = (percent: number) => {
+    // Ensure percentage is between 0 and 100
+    const clampedPercent = Math.max(0, Math.min(100, percent));
+    const t = clampedPercent / 100; // Normalised t-value from 0 to 1
+
+    // Linear interpolation for each Oklch component
+    const interpolatedL = OKLCH_GREEN_600.l + (OKLCH_RED_600.l - OKLCH_GREEN_600.l) * t;
+    const interpolatedC = OKLCH_GREEN_600.c + (OKLCH_RED_600.c - OKLCH_GREEN_600.c) * t;
+    const interpolatedH = OKLCH_GREEN_600.h + (OKLCH_RED_600.h - OKLCH_GREEN_600.h) * t;
+
+    return `oklch(${interpolatedL}% ${interpolatedC} ${interpolatedH})`;
+};
+
+
 function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
     const [percentage, setPercentage] = useState<number>(0);
     const [thisMonthIngresos, setThisMonthIngresos] = useState<number>(0);
@@ -27,7 +44,7 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
 
         const gasto = response.data.find((o: any) => o.fk_tipoDoc == 1)
         const ingresos = response.data.find((o: any) => o.fk_tipoDoc == 3)
-        if(!gasto || !ingresos) {
+        if (!gasto || !ingresos) {
             setIsLoading(false)
             return
         }
@@ -103,9 +120,20 @@ function UsagePercentage(_props: unknown, ref: React.Ref<unknown>) {
                 <div className="grid grid-cols-2">
                     <div>
                         <span className='text-muted-foreground'>% Gasto</span>
-                        <p className="text-2xl font-semibold tabular-nums">
-                            {numeral(percentage).format("0,0.0")}%
-                        </p>
+                        <div className="flex items-stretch gap-3">
+                            <p className="text-2xl font-semibold tabular-nums">
+                                {numeral(percentage).format("0,0.0")}%
+                            </p>
+                            <div className="w-1 bg-gray-200 rounded-full dark:bg-gray-700 flex flex-col justify-end">
+                                <div
+                                    className="w-1 rounded-full transition-all duration-500 ease-out"
+                                    style={{
+                                        height: `${Math.min(percentage, 100)}%`,
+                                        backgroundColor: getPercentageColor(percentage)
+                                    }}
+                                ></div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <span className='text-muted-foreground'>
