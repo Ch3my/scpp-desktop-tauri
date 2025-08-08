@@ -18,10 +18,14 @@ import {
 } from "@/components/ui/popover"
 import { useAppState } from "@/AppState"
 
-export function ComboboxCategorias() {
+interface ComboboxCategoriasProps {
+  value: number;
+  onChange: (value: number) => void;
+  disabled?: boolean;
+}
+
+export function ComboboxCategorias({ value, onChange, disabled }: ComboboxCategoriasProps) {
   const [open, setOpen] = React.useState(false)
-  // The value state will now store the ID of the selected category
-  const [value, setValue] = React.useState("")
   const { categorias } = useAppState()
 
   return (
@@ -32,9 +36,10 @@ export function ComboboxCategorias() {
           role="combobox"
           aria-expanded={open}
           className="justify-between font-normal"
+          disabled={disabled}
         >
           {value
-            ? categorias.find((framework) => String(framework.id) === value)?.descripcion
+            ? categorias.find((categoria) => categoria.id === value)?.descripcion
             : <>&nbsp;</>}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -45,27 +50,25 @@ export function ComboboxCategorias() {
           <CommandList>
             <CommandEmpty>No encontrado</CommandEmpty>
             <CommandGroup className="max-h-40">
-              {categorias.map((framework) => (
+              {categorias.map((categoria) => (
                 <CommandItem
-                  key={framework.id}
-                  // Set the value prop to the description for searching
-                  value={framework.descripcion}
+                  key={categoria.id}
+                  value={categoria.descripcion}
                   onSelect={(currentValue) => {
-                    // Find the category by its description to get its ID
                     const selectedCategory = categorias.find(
-                      (cat) => cat.descripcion === currentValue
+                      (cat) => cat.descripcion.toLowerCase() === currentValue.toLowerCase()
                     );
-                    // Update the state with the selected ID
-                    setValue(selectedCategory?.id === value ? "" : String(selectedCategory?.id));
+                    if (selectedCategory) {
+                      onChange(selectedCategory.id === value ? 0 : selectedCategory.id);
+                    }
                     setOpen(false);
                   }}
                 >
-                  {framework.descripcion}
+                  {categoria.descripcion}
                   <Check
                     className={cn(
                       "ml-auto",
-                      // Compare the stored ID with the current item's ID for the checkmark
-                      value === String(framework.id) ? "opacity-100" : "opacity-0"
+                      value === categoria.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

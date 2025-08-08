@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { ChevronsUpDown, CirclePlus, Loader2 } from "lucide-react"
+import { CirclePlus, Loader2 } from "lucide-react"
 import { Input } from './ui/input';
 import { DatePicker } from './DatePicker';
 import { DateTime } from 'luxon';
@@ -26,8 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { fetch } from '@tauri-apps/plugin-http';
 import { NumberInput } from './NumberInput';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from './ui/command';
 import { ComboboxCategorias } from './ComboboxCategorias';
 
 interface DocRecordProps {
@@ -46,9 +44,8 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     const [disableCategoria, setDisableCategoria] = useState<boolean>(false);
     // Decide whether to use the parent’s isOpen or our local state
     const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
-    const [isCommandOpen, setIsCommandOpen] = useState(false);
 
-    const { apiPrefix, sessionId, categorias, tipoDocs } = useAppState()
+    const { apiPrefix, sessionId, tipoDocs } = useAppState()
     const [disableActions, setDisableActions] = useState<boolean>(false);
     const [deleting, setDeleting] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
@@ -57,8 +54,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
     const [fecha, setFecha] = useState<DateTime>(DateTime.now());
     const [tipoDoc, setTipoDoc] = useState<number>(1);
     const [categoria, setCategoria] = useState<number>(0);
-
-    const commandInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setMonto(0);
@@ -180,21 +175,6 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
         }
     };
 
-    const getCategoriaDescripcion = (id: number) => {
-        const cat = categorias.find(c => c.id === id);
-        return cat ? cat.descripcion : '';
-    };
-
-    useEffect(() => {
-        if (isCommandOpen) {
-            // Using a setTimeout is a common practice to ensure the DOM has
-            // fully updated before trying to focus the element.
-            setTimeout(() => {
-                commandInputRef.current?.focus();
-            }, 10);
-        }
-    }, [isCommandOpen]);
-
     return (
         <>
             {!hideButton && (
@@ -241,7 +221,7 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                             </SelectContent>
                         </Select>
                         <Label>Categoria</Label>
-                        {/* <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))} disabled={disableCategoria}>
+                                                {/* <Select value={String(categoria)} onValueChange={(e) => setCategoria(Number(e))} disabled={disableCategoria}>
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
@@ -255,8 +235,11 @@ const DocRecord: React.FC<DocRecordProps> = ({ id, hideButton = false, onOpenCha
                                 </SelectGroup>
                             </SelectContent>
                         </Select> */}
-                        <ComboboxCategorias />
-
+                        <ComboboxCategorias
+                            value={categoria}
+                            onChange={setCategoria}
+                            disabled={disableCategoria}
+                        />
                     </div>
                     <DialogFooter>
                         {id !== undefined && id > 0 && (
