@@ -23,13 +23,7 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { ComboboxAlimentos } from '@/components/ComboboxAlimentos';
 
 import { useAppState } from '@/AppState';
 import { Food } from '@/models/Food';
@@ -142,9 +136,9 @@ const FoodScreen: React.FC = () => {
 
     return (
         <div className="grid gap-4 p-2 w-screen h-screen overflow-hidden" style={{ gridTemplateColumns: "1fr 2fr" }}>
-            <div className='flex flex-col gap-2'>
+            <div className='flex flex-col'>
                 <ScreenTitle title='Food Storage' />
-                <div className='flex gap-2'>
+                <div className='flex gap-2 px-1 mb-2'>
                     <Button variant="outline" onClick={() => {
                         setOpenFoodItemDialog(!openFoodItemDialog)
                     }}><CirclePlus /></Button>
@@ -218,23 +212,13 @@ const FoodScreen: React.FC = () => {
                     </div>
                 </div>
                 <div className='flex items-center justify-between'>
-                    <div className='flex gap-2'>
+                    <div className='flex gap-2 px-1'>
                         <NewFoodTransaction onOpenChange={newTrasactionDialogEvent} />
-                        <Select onValueChange={(o) => setFoodItemIdFilter(parseInt(o))}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filtro Item" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem key={0} value={"0"}>
-                                    (Todos)
-                                </SelectItem>
-                                {foods.map((food) => (
-                                    <SelectItem key={food.id} value={food.id.toString()}>
-                                        {food.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <ComboboxAlimentos
+                            foods={foods}
+                            value={foodItemIdFilter}
+                            onChange={setFoodItemIdFilter}
+                        />
                     </div>
                     <div className='flex gap-2 mr-4' >
                         <Label htmlFor="best-by-order" className='font-normal'>Vencen pronto</Label>

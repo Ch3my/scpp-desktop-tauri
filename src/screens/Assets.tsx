@@ -111,7 +111,9 @@ const Assets: React.FC = () => {
             <div>
                 <ScreenTitle title='Assets' />
                 <div>
-                    <NewAsset onAssetSaved={() => getData()} />
+                    <div className='px-1'>
+                        <NewAsset onAssetSaved={() => getData()} />
+                    </div>
                     <Table>
                         <TableHeader>
                             <TableRow>
