@@ -26,7 +26,7 @@ const RootComponent = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <Toaster position="bottom-left" />
+      <Toaster position="bottom-center" />
       <BrowserRouter>
         {isLoggedIn && <AppSidebar />}
         <Routes>

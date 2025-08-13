@@ -26,10 +26,11 @@ export interface FoodTransactionsRef {
 }
 export interface FoodTransactionsProps {
     onTransactionDeleted?: (deletedTransactionId: number) => void;
+    onTransactionEdit?: (id: number) => void;
     foodItemIdFilter: number;
     orderByBestBy?: boolean;
 }
-const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted, foodItemIdFilter, orderByBestBy }, ref) => {
+const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionDeleted, onTransactionEdit, foodItemIdFilter, orderByBestBy }, ref) => {
     const { apiPrefix, sessionId } = useAppState()
     const [transactions, setTransactions] = React.useState<FoodTransaction[]>([]);
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -192,6 +193,15 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
+                                            {o.transactionType === "restock" && (
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        onTransactionEdit?.(o.id)
+                                                    }}
+                                                >
+                                                    Editar
+                                                </DropdownMenuItem>
+                                            )}
                                             <DropdownMenuItem
                                                 onClick={() => {
                                                     deleteTransaction(o.id)

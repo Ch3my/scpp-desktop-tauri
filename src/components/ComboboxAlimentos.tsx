@@ -23,11 +23,29 @@ interface ComboboxAlimentosProps {
   onChange: (value: number) => void;
   disabled?: boolean;
   foods: Food[];
+  hideTodos?: boolean;
 }
 
-export function ComboboxAlimentos({ value, onChange, disabled, foods }: ComboboxAlimentosProps) {
+export function ComboboxAlimentos({ value, onChange, disabled, foods, hideTodos }: ComboboxAlimentosProps) {
   const [open, setOpen] = React.useState(false)
-  const allFoods = [{ id: 0, name: "Todos los Alimentos" } as Food, ...foods];
+  const allFoods = hideTodos ? foods : [{ id: 0, name: "(Todos)" } as Food, ...foods];
+
+  // Simplified display logic
+  const getDisplayText = () => {
+    const selectedFood = allFoods.find(food => food.id === value);
+
+    if (selectedFood) {
+      return selectedFood.name;
+    }
+
+    // When no selection and hideTodos is true, show nbsp
+    if (hideTodos) {
+      return "\u00A0"; // Unicode non-breaking space
+    }
+
+    // Default fallback
+    return "(Todos)";
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,9 +57,7 @@ export function ComboboxAlimentos({ value, onChange, disabled, foods }: Combobox
           className="justify-between font-normal w-[300px]"
           disabled={disabled}
         >
-          {value !== undefined && value !== null
-            ? allFoods.find((food) => food.id === value)?.name
-            : "Todos los Alimentos"}
+          {getDisplayText()}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -59,12 +75,8 @@ export function ComboboxAlimentos({ value, onChange, disabled, foods }: Combobox
                     const selectedFood = allFoods.find(
                       (f) => f.name.toLowerCase() === currentValue.toLowerCase()
                     );
-                    if (selectedFood) {
-                      if (selectedFood.id === value) {
-                        // do nothing
-                      } else {
-                        onChange(selectedFood.id);
-                      }
+                    if (selectedFood && selectedFood.id !== value) {
+                      onChange(selectedFood.id);
                     }
                     setOpen(false);
                   }}

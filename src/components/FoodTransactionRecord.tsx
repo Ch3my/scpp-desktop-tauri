@@ -10,14 +10,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CirclePlus, Loader2 } from "lucide-react"
@@ -25,24 +17,28 @@ import { useEffect, useState } from "react"
 import { DateTime } from "luxon";
 import { toast } from "sonner";
 import { DatePickerInput } from "./DatePickerInput";
+import { ComboboxAlimentos } from "./ComboboxAlimentos";
+import { Food } from "@/models/Food";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface Props {
     onOpenChange?: (isOpen: boolean) => void;
     isOpen?: boolean;
+    id?: number;
+    hideButton?: boolean;
 }
 
-const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledIsOpen }) => {
+const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: controlledIsOpen, hideButton }) => {
     const { apiPrefix, sessionId } = useAppState()
-    const [foods, setFoods] = useState<any[]>([]);
+    const [foods, setFoods] = useState<Food[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [codigo, setCodigo] = useState<string>("");
-    const [itemId, setItemId] = useState<string>("");
+    const [itemId, setItemId] = useState<number>(0);
     const [cantidad, setCantidad] = useState<number>(0);
     const [accion, setAccion] = useState<string>("");
     const [notas, setNotas] = useState<string>("");
     const [bestBefore, setBestBefore] = useState<DateTime | undefined>(undefined);
     const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState<boolean>(false);
-    // Decide whether to use the parent’s isOpen or our local state
     const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
 
     const getData = async () => {
@@ -59,12 +55,36 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
         setLoading(false);
     }
 
+    const getTransactionData = async () => {
+        if (!id) return;
+        setLoading(true);
+        let params = new URLSearchParams();
+        params.set("sessionHash", sessionId);
+        params.set("id", id.toString());
+        let data = await fetch(`${apiPrefix}/food/transaction?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+        data = data[0]; 
+        setItemId(data.item_id);
+        setCantidad(data.change_qty);
+        setAccion(data.transaction_type);
+        setCodigo(data.code);
+        setNotas(data.note);
+        if (data.best_before) {
+            setBestBefore(DateTime.fromISO(data.best_before));
+        }
+        setLoading(false);
+    }
+
     const handleSave = async () => {
         if (cantidad == 0) {
             toast("La cantidad no puede ser 0")
             return
         }
-        if (itemId == "") {
+        if (itemId == 0) {
             toast("Debes seleccionar un item")
             return
         }
@@ -76,6 +96,7 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
         let calculatedBestBefore = bestBefore ? bestBefore.toFormat("yyyy-MM-dd") : null;
         const payload = {
             sessionHash: sessionId,
+            id: id,
             foodItemId: Number(itemId),
             quantity: cantidad,
             transactionType: accion,
@@ -83,9 +104,11 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
             note: notas,
             bestBefore: calculatedBestBefore
         }
-        // console.log(payload)
-        let reponse = await fetch(`${apiPrefix}/food/transaction`, {
-            method: 'POST',
+        let url = id ? `${apiPrefix}/food/transaction` : `${apiPrefix}/food/transaction`;
+        let method = id ? 'PUT' : 'POST';
+
+        let reponse = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         }).then(response => response.json());
@@ -102,10 +125,9 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
 
     const clearInputs = () => {
         setTimeout(() => {
-            // Do not change until dialog closes
             setLoading(false);
             setCodigo("");
-            setItemId("");
+            setItemId(0);
             setCantidad(0);
             setAccion("");
             setNotas("");
@@ -113,10 +135,7 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
         }, 100)
     }
     const handleDialogChange = (open: boolean) => {
-        // If we have a parent controlling it, call the parent's callback
         onOpenChange?.(open);
-
-        // Otherwise, fall back to local state
         if (controlledIsOpen === undefined) {
             setUncontrolledIsOpen(open);
         }
@@ -128,17 +147,22 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
     useEffect(() => {
         if (isOpen) {
             getData()
+            if (id) {
+                getTransactionData()
+            }
+        } else {
+            clearInputs()
         }
-    }, [isOpen]);
+    }, [isOpen, id]);
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-            <DialogTrigger asChild>
+            {!hideButton && <DialogTrigger asChild>
                 <Button variant="outline"><CirclePlus /></Button>
-            </DialogTrigger>
+            </DialogTrigger>}
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Nueva transacción</DialogTitle>
+                    <DialogTitle>{id ? "Editar" : "Nueva"} transacción</DialogTitle>
                     <DialogDescription>
                         Ingresa, egresa o ajusta la cantidad de un alimento
                     </DialogDescription>
@@ -147,20 +171,7 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
                     <Label htmlFor="item">
                         Item
                     </Label>
-                    <Select value={itemId} onValueChange={(value) => setItemId(value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un Item" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-80">
-                            <SelectGroup>
-                                {foods.map((food) => (
-                                    <SelectItem key={food.id} value={food.id}>
-                                        {food.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                    <ComboboxAlimentos foods={foods} value={itemId} onChange={setItemId} hideTodos={true} />
                     <Label htmlFor="quantity">
                         Cantidad
                     </Label>
@@ -190,11 +201,6 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
                     <Label htmlFor="notas">
                         Vencimiento
                     </Label>
-                    {/* <DatePicker
-                        value={bestBefore}
-                        disabled={accion !== "restock"}
-                        onChange={(e) => e && setBestBefore(e)}
-                    /> */}
                     <DatePickerInput value={bestBefore}
                         disabled={accion !== "restock"}
                         onChange={(e) => e && setBestBefore(e)} />
@@ -216,4 +222,4 @@ const NewFoodTransaction: React.FC<Props> = ({ onOpenChange, isOpen: controlledI
     )
 }
 
-export default NewFoodTransaction
+export default FoodTransactionRecord
