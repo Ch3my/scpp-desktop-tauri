@@ -37,7 +37,7 @@ const FoodScreen: React.FC = () => {
     const [loading, setLoading] = React.useState<boolean>(false);
     const [openFoodItemDialog, setOpenFoodItemDialog] = React.useState<boolean>(false);
     const [openFoodTransactionDialog, setOpenFoodTransactionDialog] = React.useState<boolean>(false);
-    const [orderByBestBy, setOrderByBestBy] = React.useState<boolean>(false);
+    const [orderByBestBy, setOrderByBestBy] = React.useState<boolean>(true);
     const foodTransactionRef = useRef<FoodTransactionsRef>(null);
     const [selectedFoodItemId, setSelectedFoodItemId] = React.useState<number>(0);
     const [selectedFoodTransactionId, setSelectedFoodTransactionId] = React.useState<number>(0);
