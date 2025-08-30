@@ -18,8 +18,8 @@ import { DateTime } from "luxon";
 import { toast } from "sonner";
 import { DatePickerInput } from "./DatePickerInput";
 import { ComboboxAlimentos } from "./ComboboxAlimentos";
-import { Food } from "@/models/Food";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Props {
     onOpenChange?: (isOpen: boolean) => void;
@@ -30,56 +30,83 @@ interface Props {
 
 const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: controlledIsOpen, hideButton }) => {
     const { apiPrefix, sessionId } = useAppState()
-    const [foods, setFoods] = useState<Food[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const queryClient = useQueryClient();
     const [codigo, setCodigo] = useState<string>("");
     const [itemId, setItemId] = useState<number>(0);
-    const [cantidad, setCantidad] = useState<number>(0);
-    const [accion, setAccion] = useState<string>("");
+    const [cantidad, setCantidad] = useState<number>(1);
+    const [accion, setAccion] = useState<string>("restock");
     const [notas, setNotas] = useState<string>("");
     const [bestBefore, setBestBefore] = useState<DateTime | undefined>(undefined);
     const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState<boolean>(false);
     const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
 
-    const getData = async () => {
-        setLoading(true);
-        let params = new URLSearchParams();
-        params.set("sessionHash", sessionId);
-        let data = await fetch(`${apiPrefix}/food/items?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+    const { data: transaction, isLoading: isTransactionLoading } = useQuery<any>({
+        queryKey: ['transaction', id],
+        queryFn: async () => {
+            if (!id) return null;
+            let params = new URLSearchParams();
+            params.set("sessionHash", sessionId);
+            params.set("id", id.toString());
+            let response = await fetch(`${apiPrefix}/food/transaction?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }).then(response => response.json())
-        setFoods(data);
-        setLoading(false);
-    }
+            const data = await response.json();
+            return data[0];
+        },
+        enabled: !!id && isOpen,
+    });
 
-    const getTransactionData = async () => {
-        if (!id) return;
-        setLoading(true);
-        let params = new URLSearchParams();
-        params.set("sessionHash", sessionId);
-        params.set("id", id.toString());
-        let data = await fetch(`${apiPrefix}/food/transaction?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+    useEffect(() => {
+        if (isOpen) {
+            if (id && transaction) {
+                setItemId(transaction.item_id);
+                setCantidad(transaction.change_qty);
+                setAccion(transaction.transaction_type);
+                setCodigo(transaction.code);
+                setNotas(transaction.note);
+                if (transaction.best_before) {
+                    setBestBefore(DateTime.fromISO(transaction.best_before));
+                }
+            } else {
+                clearInputs();
             }
-        }).then(response => response.json())
-        data = data[0]; 
-        setItemId(data.item_id);
-        setCantidad(data.change_qty);
-        setAccion(data.transaction_type);
-        setCodigo(data.code);
-        setNotas(data.note);
-        if (data.best_before) {
-            setBestBefore(DateTime.fromISO(data.best_before));
         }
-        setLoading(false);
-    }
+    }, [isOpen, id, transaction]);
 
-    const handleSave = async () => {
+    const mutation = useMutation({
+        mutationFn: async (payload: any) => {
+            let url = id ? `${apiPrefix}/food/transaction` : `${apiPrefix}/food/transaction`;
+            let method = id ? 'PUT' : 'POST';
+    
+            let reponse = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            }).then(response => response.json());
+
+            if (reponse.hasErrors) {
+                throw new Error(reponse.errorDescription[0]);
+            }
+            return reponse;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
+            toast("Transacción guardada")
+            handleDialogChange(false);
+            clearInputs()
+        },
+        onError: (error: Error) => {
+            toast("Error al guardar la transacción " + error.message)
+        }
+    })
+
+    const handleSave = () => {
         if (cantidad == 0) {
             toast("La cantidad no puede ser 0")
             return
@@ -92,7 +119,6 @@ const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: cont
             toast("Debes seleccionar una acción")
             return
         }
-        setLoading(true);
         let calculatedBestBefore = bestBefore ? bestBefore.toFormat("yyyy-MM-dd") : null;
         const payload = {
             sessionHash: sessionId,
@@ -104,56 +130,27 @@ const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: cont
             note: notas,
             bestBefore: calculatedBestBefore
         }
-        let url = id ? `${apiPrefix}/food/transaction` : `${apiPrefix}/food/transaction`;
-        let method = id ? 'PUT' : 'POST';
-
-        let reponse = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        }).then(response => response.json());
-
-        if (reponse.hasErrors) {
-            toast("Error al guardar la transacción " + reponse.errorDescription[0])
-            setLoading(false);
-            return
-        }
-        toast("Transacción guardada")
-        handleDialogChange(false);
-        clearInputs()
+        mutation.mutate(payload);
     }
 
     const clearInputs = () => {
         setTimeout(() => {
-            setLoading(false);
             setCodigo("");
             setItemId(0);
-            setCantidad(0);
-            setAccion("");
+            setCantidad(1);
+            setAccion("restock");
             setNotas("");
             setBestBefore(undefined);
         }, 100)
     }
+    
+
     const handleDialogChange = (open: boolean) => {
         onOpenChange?.(open);
         if (controlledIsOpen === undefined) {
             setUncontrolledIsOpen(open);
         }
-        if (!isOpen) {
-            clearInputs()
-        }
     };
-
-    useEffect(() => {
-        if (isOpen) {
-            getData()
-            if (id) {
-                getTransactionData()
-            }
-        } else {
-            clearInputs()
-        }
-    }, [isOpen, id]);
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDialogChange}>
@@ -171,7 +168,7 @@ const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: cont
                     <Label htmlFor="item">
                         Item
                     </Label>
-                    <ComboboxAlimentos foods={foods} value={itemId} onChange={setItemId} hideTodos={true} />
+                    <ComboboxAlimentos value={itemId} onChange={setItemId} hideTodos={true} />
                     <Label htmlFor="quantity">
                         Cantidad
                     </Label>
@@ -212,8 +209,8 @@ const FoodTransactionRecord: React.FC<Props> = ({ onOpenChange, id, isOpen: cont
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotas(e.target.value)} />
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleSave} disabled={loading}>
-                        {loading && <Loader2 className="animate-spin" />}
+                    <Button onClick={handleSave} disabled={mutation.isPending || isTransactionLoading}>
+                        {(mutation.isPending || isTransactionLoading) && <Loader2 className="animate-spin" />}
                         Guardar
                     </Button>
                 </DialogFooter>

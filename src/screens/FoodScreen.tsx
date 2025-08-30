@@ -1,125 +1,47 @@
-import React, { useEffect, useRef } from 'react';
-import { fetch } from '@tauri-apps/plugin-http';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { CirclePlus, MoreHorizontal } from 'lucide-react';
+import React, { useRef } from 'react';
+import { CirclePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+import { FoodScreenTable } from '@/components/FoodScreenTable';
 import { ComboboxAlimentos } from '@/components/ComboboxAlimentos';
 
 import { useAppState } from '@/AppState';
-import { Food } from '@/models/Food';
 import ScreenTitle from '@/components/ScreenTitle';
-import { DateTime } from 'luxon';
 
 import FoodTransactions, { FoodTransactionsRef } from '@/components/FoodTransactions';
 import FoodItemRecord from '@/components/FoodItemRecord';
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import FoodTransactionRecord from '@/components/FoodTransactionRecord';
+
+import { Input } from '@/components/ui/input';
+import { useQueryClient } from '@tanstack/react-query';
 
 const FoodScreen: React.FC = () => {
     const { apiPrefix, sessionId } = useAppState()
-    const [foods, setFoods] = React.useState<Food[]>([]);
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const queryClient = useQueryClient();
     const [openFoodItemDialog, setOpenFoodItemDialog] = React.useState<boolean>(false);
     const [openFoodTransactionDialog, setOpenFoodTransactionDialog] = React.useState<boolean>(false);
-    const [orderByBestBy, setOrderByBestBy] = React.useState<boolean>(true);
     const foodTransactionRef = useRef<FoodTransactionsRef>(null);
     const [selectedFoodItemId, setSelectedFoodItemId] = React.useState<number>(0);
     const [selectedFoodTransactionId, setSelectedFoodTransactionId] = React.useState<number>(0);
     const [foodItemIdFilter, setFoodItemIdFilter] = React.useState<number>(0);
-
-    const getData = async () => {
-        setLoading(true);
-        let params = new URLSearchParams();
-        params.set("sessionHash", sessionId);
-
-        try {
-            let response = await fetch(`${apiPrefix}/food/item-quantity?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            let apiData: any[] = await response.json();
-
-            const foodsData: Food[] = apiData.map(item => ({
-                id: item.id,
-                name: item.name,
-                unit: item.unit,
-                quantity: item.quantity,
-                lastTransactionAt: item.last_transaction_at ? DateTime.fromISO(item.last_transaction_at) : null
-            }));
-
-            setFoods(foodsData);
-            setLoading(false);
-
-        } catch (error) {
-            console.error("Failed to fetch or process food data:", error);
-            setLoading(false);
-        }
-    }
+    const [codeFilter, setCodeFilter] = React.useState<string>("");
 
     const foodTransactionDialogEvent = (isOpen: boolean) => {
         setOpenFoodTransactionDialog(isOpen)
         if (!isOpen) {
-            getData()
-            foodTransactionRef.current?.getData()
+            queryClient.invalidateQueries({ queryKey: ['foods'] });
+            foodTransactionRef.current?.refetch()
             setSelectedFoodTransactionId(0)
         }
     }
     const newFoodItemDialogEvent = (isOpen: boolean) => {
         setOpenFoodItemDialog(isOpen)
         if (!isOpen) {
-            getData()
+            queryClient.invalidateQueries({ queryKey: ['foods'] });
             setTimeout(() => {
                 setSelectedFoodItemId(0) // Reset the selected food item ID
             }, 100); // Delay to allow the dialog to close before reset that change text inside the dialog
         }
-    }
-
-    const deleteFoodItem = async (id: number) => {
-        setLoading(true)
-        let response = await fetch(`${apiPrefix}/food/item`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ sessionHash: sessionId, id: id }),
-
-        }).then(response => response.json())
-
-        if (response.hasErrors) {
-            toast.error('Error al eliminar el item: ' + response.errorDescription[0]);
-            setLoading(false)
-            return
-        }
-        toast('Item eliminado');
-        // NOTA. setLoading(false) is called in the getData function
-        getData()
-    }
-
-    const editFoodItem = async (id: number) => {
-        setSelectedFoodItemId(id)
-        setOpenFoodItemDialog(true)
     }
 
     const editFoodTransaction = async (id: number) => {
@@ -127,72 +49,21 @@ const FoodScreen: React.FC = () => {
         setOpenFoodTransactionDialog(true)
     }
 
-    useEffect(() => {
-        getData()
-    }, []);
-
     return (
         <div className="grid gap-4 p-2 w-screen h-screen overflow-hidden" style={{ gridTemplateColumns: "1fr 2fr" }}>
-            <div className='flex flex-col gap-2'>
+            <div className='flex flex-col gap-2 overflow-y-auto'>
                 <ScreenTitle title='Food Storage' />
                 <div className='flex gap-2'>
                     <Button variant="outline" onClick={() => {
                         setOpenFoodItemDialog(!openFoodItemDialog)
                     }}><CirclePlus /></Button>
                 </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead className="text-right">Cant</TableHead>
-                            <TableHead></TableHead>
-                            <TableHead className='min-w-[100px]'>Actividad</TableHead>
-                            <TableHead></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {foods.length === 0 && !loading ? (
-                            <TableRow>
-                                <TableCell colSpan={4} className="text-center">No se encontraron alimentos.</TableCell>
-                            </TableRow>
-                        ) : (
-                            foods.map((food) => (
-                                <TableRow key={food.id}>
-                                    <TableCell className="font-medium">{food.name}</TableCell>
-                                    <TableCell className="text-right">{food.quantity}</TableCell>
-                                    <TableCell className='w-[40px]'>{food.unit}</TableCell>
-                                    <TableCell>{food.lastTransactionAt?.toFormat("dd-MM-yyyy")}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu modal={false}>
-                                            <DropdownMenuTrigger>
-                                                <Button variant="ghost" className="h-6 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        editFoodItem(food.id)
-                                                    }}
-                                                >
-                                                    Editar
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        deleteFoodItem(food.id)
-                                                    }}
-                                                >
-                                                    Eliminar
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                <FoodScreenTable
+                    apiPrefix={apiPrefix}
+                    sessionId={sessionId}
+                    onEditFoodItem={setSelectedFoodItemId}
+                    onOpenFoodItemDialog={setOpenFoodItemDialog}
+                />
             </div>
             <div className='flex flex-col gap-2 overflow-auto'>
                 <ScreenTitle title='Transacciones' />
@@ -202,22 +73,23 @@ const FoodScreen: React.FC = () => {
                             setOpenFoodTransactionDialog(!openFoodTransactionDialog)
                         }}><CirclePlus /></Button>
                         <ComboboxAlimentos
-                            foods={foods}
                             value={foodItemIdFilter}
                             onChange={setFoodItemIdFilter}
                         />
-                    </div>
-                    <div className='flex gap-2 mr-4' >
-                        <Label htmlFor="best-by-order" className='font-normal'>Vencen pronto</Label>
-                        <Switch id="best-by-order" checked={orderByBestBy} onCheckedChange={(o: any) => setOrderByBestBy(o)} />
+                        <Input
+                            placeholder="Buscar por código..."
+                            value={codeFilter}
+                            onChange={(event) => setCodeFilter(event.target.value)}
+                            className="max-w-sm"
+                        />
                     </div>
                 </div>
                 <div className='overflow-y-auto'>
                     <FoodTransactions ref={foodTransactionRef}
-                        onTransactionDeleted={() => { getData() }}
                         onTransactionEdit={(id) => { editFoodTransaction(id) }}
                         foodItemIdFilter={foodItemIdFilter}
-                        orderByBestBy={orderByBestBy} />
+                        codeFilter={codeFilter}
+                    />
                 </div>
             </div>
             <FoodItemRecord onOpenChange={newFoodItemDialogEvent} id={selectedFoodItemId} isOpen={openFoodItemDialog} hideButton={true} />

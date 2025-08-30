@@ -1,13 +1,8 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React from 'react';
 import { fetch } from '@tauri-apps/plugin-http';
-import { useAppState } from '@/AppState';
-import { FoodTransaction } from '@/models/FoodTransaction';
-import { DateTime } from 'luxon';
 import {
-    ColumnFiltersState,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
     getSortedRowModel,
     SortingState,
     useReactTable,
@@ -20,115 +15,96 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { toast } from 'sonner';
-import { columns } from '@/table-columns-def/food-transactions-columns';
+import { Food } from "@/models/Food"
+import { columns } from "@/table-columns-def/food-screen-columns"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { DateTime } from 'luxon';
+import { toast } from 'sonner';
 
-export interface FoodTransactionsRef {
-    refetch: () => void;
+interface FoodScreenTableProps {
+    apiPrefix: string;
+    sessionId: string;
+    onEditFoodItem: (id: number) => void;
+    onOpenFoodItemDialog: (isOpen: boolean) => void;
 }
-export interface FoodTransactionsProps {
-    onTransactionEdit?: (id: number) => void;
-    foodItemIdFilter: number;
-    codeFilter: string;
-}
-const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(({ onTransactionEdit, foodItemIdFilter, codeFilter }, ref) => {
-    const { apiPrefix, sessionId } = useAppState()
+
+export function FoodScreenTable({ apiPrefix, sessionId, onEditFoodItem, onOpenFoodItemDialog }: FoodScreenTableProps) {
     const queryClient = useQueryClient();
-    const [sorting, setSorting] = useState<SortingState>([{ id: 'bestBefore', desc: false }]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-        []
-    )
+    const [sorting, setSorting] = React.useState<SortingState>([])
 
-    const { data: transactions = [], refetch } = useQuery<FoodTransaction[]>({
-        queryKey: ['transactions', foodItemIdFilter],
+    const { data: foods = [] } = useQuery<Food[]>({
+        queryKey: ['foods'],
         queryFn: async () => {
             let params = new URLSearchParams();
             params.set("sessionHash", sessionId);
-            params.set("page", String(1));
-            params.set("itemId", String(foodItemIdFilter));
 
-            let response = await fetch(`${apiPrefix}/food/transaction?${params.toString()}`, {
+            let response = await fetch(`${apiPrefix}/food/item-quantity?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json'
                 }
             });
             if (!response.ok) {
+                console.error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             let apiData: any[] = await response.json();
 
-            return apiData.map((item: any) => {
-                let food = {
-                    id: item.item_id,
-                    name: item.item_name,
-                    unit: item.item_unit,
-                    quantity: null,
-                    lastTransactionAt: null
-                }
-                return {
-                    id: item.id,
-                    itemId: item.item_id,
-                    changeQty: item.change_qty,
-                    occurredAt: DateTime.fromISO(item.occurred_at, { zone: 'utc' }),
-                    transactionType: item.transaction_type,
-                    note: item.note,
-                    code: item.code,
-                    bestBefore: item.best_before ? DateTime.fromISO(item.best_before, { zone: 'utc' }) : null,
-                    food: food,
-                    remainingQuantity: item.remaining_quantity,
-                    fkTransaction: item.fk_transaction
-                }
-            });
+            const transformedData = apiData.map(item => ({
+                id: item.id,
+                name: item.name,
+                unit: item.unit,
+                quantity: item.quantity,
+                lastTransactionAt: item.last_transaction_at ? DateTime.fromISO(item.last_transaction_at) : null
+            }));
+            return transformedData;
         }
     });
 
-    useImperativeHandle(ref, () => ({
-        refetch
-    }));
-
     const deleteMutation = useMutation({
         mutationFn: async (id: number) => {
-            await fetch(`${apiPrefix}/food/transaction`, {
+            const response = await fetch(`${apiPrefix}/food/item`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ sessionHash: sessionId, id: id }),
 
-            }).then(response => response.json())
+            });
+            const data = await response.json();
+            if (data.hasErrors) {
+                throw new Error(data.errorDescription[0]);
+            }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['transactions', foodItemIdFilter] })
-            toast('Transacción eliminada');
+            queryClient.invalidateQueries({ queryKey: ['foods'] });
+            toast('Item eliminado');
+        },
+        onError: (error) => {
+            toast.error('Error al eliminar el item: ' + error.message);
         }
     })
 
     const table = useReactTable({
-        data: transactions,
+        data: foods,
         columns,
         getCoreRowModel: getCoreRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
-        getFilteredRowModel: getFilteredRowModel(),
         state: {
             sorting,
-            columnFilters,
         },
         meta: {
-            onTransactionDeleted: (id: number) => deleteMutation.mutate(id),
-            onTransactionEdit: onTransactionEdit
+            deleteFoodItem: (id: number) => deleteMutation.mutate(id),
+            editFoodItem: (id: number) => {
+                onEditFoodItem(id);
+                onOpenFoodItemDialog(true);
+            }
         }
     })
 
-    useEffect(() => {
-        table.getColumn('code')?.setFilterValue(codeFilter)
-    }, [codeFilter]);
-
     return (
-        <div>
+        <div className="overflow-y-auto">
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -172,7 +148,5 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
                 </TableBody>
             </Table>
         </div>
-    );
-});
-
-export default FoodTransactions;
+    )
+}

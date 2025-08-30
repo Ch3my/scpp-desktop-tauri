@@ -17,17 +17,51 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Food } from "@/models/Food"
+import { useQuery } from '@tanstack/react-query';
+import { fetch } from '@tauri-apps/plugin-http';
+import { DateTime } from 'luxon';
+import { useAppState } from "@/AppState"
 
 interface ComboboxAlimentosProps {
   value: number;
   onChange: (value: number) => void;
   disabled?: boolean;
-  foods: Food[];
   hideTodos?: boolean;
 }
 
-export function ComboboxAlimentos({ value, onChange, disabled, foods, hideTodos }: ComboboxAlimentosProps) {
+export function ComboboxAlimentos({ value, onChange, disabled, hideTodos }: ComboboxAlimentosProps) {
   const [open, setOpen] = React.useState(false)
+  const { apiPrefix, sessionId } = useAppState()
+
+  const { data: foods = [] } = useQuery<Food[]>({
+    queryKey: ['foodsCombobox'], // Use a different query key to avoid conflicts
+    queryFn: async () => {
+      let params = new URLSearchParams();
+      params.set("sessionHash", sessionId);
+
+      let response = await fetch(`${apiPrefix}/food/item-quantity?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      let apiData: any[] = await response.json();
+
+      const transformedData = apiData.map(item => ({
+        id: item.id,
+        name: item.name,
+        unit: item.unit,
+        quantity: item.quantity,
+        lastTransactionAt: item.last_transaction_at ? DateTime.fromISO(item.last_transaction_at) : null
+      }));
+      return transformedData;
+    }
+  });
+
   const allFoods = hideTodos ? foods : [{ id: 0, name: "(Todos)" } as Food, ...foods];
 
   // Simplified display logic

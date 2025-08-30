@@ -13,8 +13,14 @@ import Dashboard from "./screens/Dashboard";
 import { Htas } from "./screens/Htas";
 import Assets from "./screens/Assets";
 import { invoke } from "@tauri-apps/api/core";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 import "./App.css";
 import "./Custom.css";
+
+const queryClient = new QueryClient()
 
 const RootComponent = () => {
   const { isLoggedIn } = useAppState();
@@ -27,18 +33,20 @@ const RootComponent = () => {
   return (
     <SidebarProvider defaultOpen={false}>
       <Toaster position="bottom-center" />
-      <BrowserRouter>
-        {isLoggedIn && <AppSidebar />}
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/config" element={<Config />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/htas" element={<Htas />} />
-          <Route path="/assets" element={<Assets />} />
-          <Route path="/food" element={<FoodScreen />} />
-        </Routes>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          {isLoggedIn && <AppSidebar />}
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/config" element={<Config />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/htas" element={<Htas />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/food" element={<FoodScreen />} />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
     </SidebarProvider>
   );
 };
@@ -48,20 +56,3 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <RootComponent />
   </React.StrictMode>
 );
-
-// ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-//   <React.StrictMode>
-//     <SidebarProvider defaultOpen={false}>
-//       {isLoggedIn && <AppSidebar />}
-//       {isLoggedIn && <SidebarTrigger />}
-//       <BrowserRouter>
-//         <Toaster />
-//         <Routes>
-//           <Route path="/" element={<App />} />
-//           <Route path="/login" element={<Login />} />
-//           <Route path="/config" element={<Config />} />
-//         </Routes>
-//       </BrowserRouter>
-//     </SidebarProvider>
-//   </React.StrictMode>,
-// );
