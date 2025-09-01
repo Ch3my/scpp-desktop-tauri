@@ -105,7 +105,7 @@ export function FoodScreenTable({ apiPrefix, sessionId, onEditFoodItem, onOpenFo
 
     return (
         <div className="overflow-y-auto">
-            <Table>
+            <Table size='compact'>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>

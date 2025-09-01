@@ -1,18 +1,25 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
+
+const TableContext = React.createContext<{ size?: "compact" }>({});
+
+export interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
+  size?: "compact";
+}
 
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
-      {...props}
-    />
-  </div>
+  TableProps
+>(({ className, size, ...props }, ref) => (
+  <TableContext.Provider value={{ size }}>
+    <div className="relative w-full overflow-auto">
+      <table
+        ref={ref}
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    </div>
+  </TableContext.Provider>
 ))
 Table.displayName = "Table"
 
@@ -43,7 +50,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium last:[&>tr]:border-b-0",
+      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
       className
     )}
     {...props}
@@ -69,28 +76,40 @@ TableRow.displayName = "TableRow"
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <th
-    ref={ref}
-    className={cn(
-      "h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const { size } = React.useContext(TableContext);
+  return (
+    <th
+      ref={ref}
+      className={cn(
+        size === "compact" ? "h-8 px-2" : "h-12 px-4",
+        "text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 TableHead.displayName = "TableHead"
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <td
-    ref={ref}
-    className={cn("p-2 align-middle [&:has([role=checkbox])]:pr-0", className)}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const { size } = React.useContext(TableContext);
+
+  return (
+    <td
+      ref={ref}
+      className={cn(
+        size === "compact" ? "p-2" : "p-4",
+        "align-middle [&:has([role=checkbox])]:pr-0",
+        className
+      )}
+      {...props}
+    />
+  );
+});
 TableCell.displayName = "TableCell"
 
 const TableCaption = React.forwardRef<

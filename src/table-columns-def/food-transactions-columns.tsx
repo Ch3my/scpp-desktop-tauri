@@ -126,7 +126,7 @@ export const columns: ColumnDef<FoodTransaction>[] = [
     },
     {
         accessorKey: "food.unit",
-        header: "Unidad"
+        header: "Und"
     },
     {
         accessorKey: "transactionType",
@@ -159,7 +159,7 @@ export const columns: ColumnDef<FoodTransaction>[] = [
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-4 w-6 p-0">
                                 <span className="sr-only">Open menu</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>

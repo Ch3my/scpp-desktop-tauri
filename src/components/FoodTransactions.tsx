@@ -129,7 +129,7 @@ const FoodTransactions = forwardRef<FoodTransactionsRef, FoodTransactionsProps>(
 
     return (
         <div>
-            <Table>
+            <Table size='compact'>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>

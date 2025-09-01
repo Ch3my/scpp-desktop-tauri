@@ -114,7 +114,7 @@ const Assets: React.FC = () => {
                     <div className='px-1'>
                         <NewAsset onAssetSaved={() => getData()} />
                     </div>
-                    <Table>
+                    <Table size='compact'>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">Fecha</TableHead>

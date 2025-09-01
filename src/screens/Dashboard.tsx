@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
                 <Label>Total: ${numeral(totalDocs).format("0,0")}</Label>
 
                 <div className='overflow-auto' >
-                    <Table>
+                    <Table size='compact'>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">Fecha</TableHead>
