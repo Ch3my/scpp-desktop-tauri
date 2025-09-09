@@ -1,7 +1,7 @@
 import { useAppState } from "@/AppState";
 import { Button } from "@/components/ui/button"
 import { fetch } from '@tauri-apps/plugin-http';
-import { Link, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 import {
     Card,
     CardContent,
@@ -44,9 +44,6 @@ export function Htas() {
                     <CardDescription></CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                                        <Button variant="outline" asChild>
-                        <Link to="/config">Config</Link>
-                    </Button>
                     <Button variant="outline" onClick={logout}>Salir</Button>
                 </CardContent>
             </Card>

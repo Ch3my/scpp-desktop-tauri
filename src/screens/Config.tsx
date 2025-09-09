@@ -12,11 +12,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAppState } from "@/AppState"
-import { useNavigate } from "react-router";
+import { Link } from "react-router"
 
 export default function Config() {
     const { sessionId, apiPrefix, setApiPrefix, setSessionId } = useAppState()
-    const navigate = useNavigate();
     
     const [localApiPrefix, setLocalApiPrefix] = useState<string>(apiPrefix);
     const [localSessionId, setLocalSessionId] = useState<string>(sessionId);
@@ -47,13 +46,15 @@ export default function Config() {
                             </div>
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="sessionId">SessionId</Label>
-                                <Input id="sessionId" onChange={e => setLocalSessionId(e.target.value)} value={localSessionId} />
+                                <Input id="sessionId" onChange={e => setLocalSessionId(e.target.value)} />
                             </div>
                         </div>
                     </form>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={() => navigate(-1)}>Volver</Button>
+                    <Button variant="outline" asChild>
+                        <Link to="/login">Login</Link>
+                    </Button>
                     <Button className="block" onClick={() => saveConfig()}>Guardar</Button>
                 </CardFooter>
             </Card>
