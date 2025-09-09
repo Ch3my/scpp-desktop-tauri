@@ -2,8 +2,6 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } fro
 import { fetch } from "@tauri-apps/plugin-http"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { DateTime, Settings } from "luxon";
-
-
 import { useAppState } from "@/AppState"
 import {
     ChartConfig,
@@ -86,6 +84,15 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
         };
     });
 
+    // Calculate the max value across all datasets for a dynamic Y-axis domain
+    const allDataValues = [
+        ...monthlyGraphData.gastosDataset,
+        ...monthlyGraphData.ingresosDataset,
+        ...monthlyGraphData.ahorrosDataset,
+    ];
+    const dataMax = Math.max(...allDataValues);
+    const yAxisDomainMax = Math.round(dataMax * 1.1); // Add a 10% buffer
+
     if (isLoading) {
         return (
             <Card>
@@ -122,7 +129,8 @@ function MonthlyGraphChart(_props: unknown, ref: React.Ref<unknown>) {
                             tickMargin={8}
                         />
                         <YAxis
-                            domain={[0, "auto"]}
+                            domain={[0, yAxisDomainMax]}
+                            scale={"linear"}
                             tickFormatter={(value) =>
                                 new Intl.NumberFormat("en-US").format(value)
                             }

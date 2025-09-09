@@ -122,7 +122,7 @@ const GraficoCategoriasNew = forwardRef<GraficoCategoriasRef, GraficoCategoriasP
                             data={chartData}
                             layout="vertical"
                             margin={{
-                                left: 50,
+                                left: 25, right: 100 
                             }}
                         >
                             <XAxis type="number" dataKey="amount" hide />
