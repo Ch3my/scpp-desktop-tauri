@@ -25,6 +25,7 @@ const FoodScreen: React.FC = () => {
     const [selectedFoodTransactionId, setSelectedFoodTransactionId] = React.useState<number>(0);
     const [foodItemIdFilter, setFoodItemIdFilter] = React.useState<number>(0);
     const [codeFilter, setCodeFilter] = React.useState<string>("");
+    const [comboboxOpen, setComboboxOpen] = React.useState<boolean>(false);
 
     const foodTransactionDialogEvent = (isOpen: boolean) => {
         setOpenFoodTransactionDialog(isOpen)
@@ -75,6 +76,8 @@ const FoodScreen: React.FC = () => {
                         <ComboboxAlimentos
                             value={foodItemIdFilter}
                             onChange={setFoodItemIdFilter}
+                            open={comboboxOpen}
+                            onOpenChange={setComboboxOpen}
                         />
                         <Input
                             placeholder="Buscar por código..."
